@@ -58,7 +58,8 @@ const taskbookCLI = (input, flags) => {
     }
 
     if (flags.find) {
-        return taskbook.findItems(input);
+        taskbook.findItems(input);
+        return taskbook.displayStats();
     }
 
     if (flags.list) {

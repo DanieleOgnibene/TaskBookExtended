@@ -129,7 +129,7 @@ class Taskbook {
         const isBug = this._getIsBug(input);
 
         input.forEach(x => {
-            if (!this._isPriorityOpt(x) &&  !this._isBugOpt(x)) {
+            if (!this._isPriorityOpt(x) && !this._isBugOpt(x)) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
             }
         });
@@ -418,7 +418,7 @@ class Taskbook {
 
         const todayDate = new Date().toDateString();
         started.forEach(id => {
-           _data[id].activeDate = todayDate;
+            _data[id].activeDate = todayDate;
         });
 
         this._save(_data);
@@ -450,6 +450,7 @@ class Taskbook {
 
     displayArchive() {
         render.displayByDate(this._groupByDate(this._archive, this._getCreationDates(this._archive)));
+        console.log('');
     }
 
     displayByBoard() {
