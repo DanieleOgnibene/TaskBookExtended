@@ -1,15 +1,8 @@
 {
-  "name": "taskbook",
-  "productName": "Taskbook",
+  "name": "taskbook-extended",
+  "productName": "TaskbookExtended",
   "version": "1.0.0",
   "description": "Tasks, boards & notes for the command-line habitat",
-  "repository": "klaussinani/taskbook",
-  "license": "MIT",
-  "author": {
-    "name": "Klaus Sinani",
-    "email": "klaussinani@gmail.com",
-    "url": "https://klaussinani.github.io"
-  },
   "bin": {
     "tb": "cli.js"
   },
