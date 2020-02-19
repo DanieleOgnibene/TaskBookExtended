@@ -7,6 +7,7 @@ module.exports = `
     Options
         none             Display board view
       --ai               Display timeline view by active date
+      --addBoard         Add a board to an item
       --archive, -a      Display archived items
       --begin, -b        Start/pause task
       --bug              Toggle bug property      
@@ -23,6 +24,7 @@ module.exports = `
       --moveToToday      Move items with ids to today date
       --note, -n         Create note
       --priority, -p     Update priority of task
+      --removeBoard      Remove a board from an item
       --resetDate        Move items with ids to their creation date
       --restore, -r      Restore items from archive
       --star, -s         Star/unstar item
@@ -34,6 +36,7 @@ module.exports = `
     Examples
       $ tb
       $ tb --ai
+      $ tb --addBoard 2 @newBoard
       $ tb --archive
       $ tb --begin 2 3
       $ tb --bug 2 3
@@ -49,6 +52,7 @@ module.exports = `
       $ tb --moveToToday 1 2
       $ tb --note @coding Mergesort worse-case O(nlogn)
       $ tb --priority @3 2
+      $ tb --removeBoard 3 @boardName
       $ tb --resetDate 3 2
       $ tb --restore 4
       $ tb --star 2

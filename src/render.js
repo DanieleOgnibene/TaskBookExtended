@@ -387,6 +387,18 @@ class Render {
         success({prefix, message});
     }
 
+    successAddBoard(boards, ids) {
+        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', '))];
+        const message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} added to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
+        success({message});
+    }
+
+    successRemoveBoard(boards, ids) {
+        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', '))];
+        const message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} removed from ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
+        success({message});
+    }
+
     successResetDate(ids) {
         const [prefix, suffix] = ['\n', grey(ids.join(', '))];
         const message = `${ids.length > 1 ? 'Items' : 'Item'} moved to creation date:`;

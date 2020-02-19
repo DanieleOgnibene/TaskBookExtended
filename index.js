@@ -75,6 +75,14 @@ const taskbookCLI = (input, flags) => {
         return taskbook.moveBoards(input);
     }
 
+    if (flags.addBoard) {
+        return taskbook.addBoard(input);
+    }
+
+    if (flags.removeBoard) {
+        return taskbook.removeBoard(input);
+    }
+
     if (flags.moveToToday) {
         return taskbook.moveToToday(input);
     }
