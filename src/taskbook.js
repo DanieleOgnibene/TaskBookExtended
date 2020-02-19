@@ -129,7 +129,7 @@ class Taskbook {
         const isBug = this._getIsBug(input);
 
         input.forEach(x => {
-            if (!this._isPriorityOpt(x) &&  !this._isBugOpt(x)) {
+            if (!this._isPriorityOpt(x) && !this._isBugOpt(x)) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
             }
         });
@@ -418,7 +418,7 @@ class Taskbook {
 
         const todayDate = new Date().toDateString();
         started.forEach(id => {
-           _data[id].activeDate = todayDate;
+            _data[id].activeDate = todayDate;
         });
 
         this._save(_data);
@@ -450,6 +450,7 @@ class Taskbook {
 
     displayArchive() {
         render.displayByDate(this._groupByDate(this._archive, this._getCreationDates(this._archive)));
+        console.log('');
     }
 
     displayByBoard() {
@@ -532,11 +533,11 @@ class Taskbook {
     moveItemsToDate(input) {
         const targets = input.filter(x => x.startsWith('@'));
         const dateInputs = input.filter(x => !x.startsWith('@'));
-        if (targets.length === 0) {
+        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
+        if (ids.length === 0) {
             render.missingID();
             process.exit(1);
         }
-        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
         if (dateInputs.length === 0) {
             render.missingDate();
             process.exit(1);
@@ -548,6 +549,48 @@ class Taskbook {
         });
         this._save(_data);
         render.successMoveToDate(date, ids);
+    }
+
+    addBoard(input) {
+        const targets = input.filter(x => !x.startsWith('@'));
+        const boards = input.filter(x => x.startsWith('@'));
+        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        if (boards.length === 0) {
+            render.missingBoards();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].boards.push(
+                ...boards.filter(board => _data[id].boards.every(itemBoard => itemBoard !== board))
+            );
+        });
+        this._save(_data);
+        render.successAddBoard(boards, ids);
+    }
+
+    removeBoard(input) {
+        const targets = input.filter(x => !x.startsWith('@'));
+        const boards = input.filter(x => x.startsWith('@'));
+        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        if (boards.length === 0) {
+            render.missingBoards();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].boards = _data[id].boards.filter(itemBoard => boards.every(board => itemBoard !== board));
+        });
+        this._save(_data);
+        render.successRemoveBoard(boards, ids);
     }
 
     _convertDateStringInput(dateString) {

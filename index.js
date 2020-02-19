@@ -58,7 +58,8 @@ const taskbookCLI = (input, flags) => {
     }
 
     if (flags.find) {
-        return taskbook.findItems(input);
+        taskbook.findItems(input);
+        return taskbook.displayStats();
     }
 
     if (flags.list) {
@@ -72,6 +73,14 @@ const taskbookCLI = (input, flags) => {
 
     if (flags.move) {
         return taskbook.moveBoards(input);
+    }
+
+    if (flags.addBoard) {
+        return taskbook.addBoard(input);
+    }
+
+    if (flags.removeBoard) {
+        return taskbook.removeBoard(input);
     }
 
     if (flags.moveToToday) {
