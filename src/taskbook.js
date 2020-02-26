@@ -428,11 +428,11 @@ class Taskbook {
         });
         paused.forEach(id => {
             const task = _data[id];
-            const comulativeTimeTaken = task.comulativeTimeTaken || 0;
+            const cumulativeTimeTaken = task.cumulativeTimeTaken || 0;
             const inProgressActivationTime = task.inProgressActivationTime;
             const timeTakenToAdd = !!inProgressActivationTime ? new Date().getTime() - inProgressActivationTime : 0;
             _data[id].inProgress = false;
-            _data[id].comulativeTimeTaken = comulativeTimeTaken + timeTakenToAdd;
+            _data[id].cumulativeTimeTaken = cumulativeTimeTaken + timeTakenToAdd;
             _data[id].inProgressActivationTime = undefined;
         });
         this._save(_data);
@@ -684,7 +684,7 @@ class Taskbook {
         ids = this._validateIDs(ids);
         const {_data} = this;
         ids.forEach(id => {
-            _data[id].comulativeTimeTaken = 0;
+            _data[id].cumulativeTimeTaken = 0;
         });
         this._save(_data);
         render.successClearTime(ids);
@@ -704,7 +704,7 @@ class Taskbook {
         }
         const {_data} = this;
         ids.forEach(id => {
-            _data[id].comulativeTimeTaken += time * 60000;
+            _data[id].cumulativeTimeTaken += time * 60000;
         });
         this._save(_data);
         render.successAddTime(time, ids);
@@ -724,10 +724,10 @@ class Taskbook {
         }
         const {_data} = this;
         ids.forEach(id => {
-            _data[id].comulativeTimeTaken -= time * 60000;
-            if (_data[id].comulativeTimeTaken < 0) {
-                time = +time + _data[id].comulativeTimeTaken / 60000;
-                _data[id].comulativeTimeTaken = 0;
+            _data[id].cumulativeTimeTaken -= time * 60000;
+            if (_data[id].cumulativeTimeTaken < 0) {
+                time = +time + _data[id].cumulativeTimeTaken / 60000;
+                _data[id].cumulativeTimeTaken = 0;
             }
         });
         this._save(_data);

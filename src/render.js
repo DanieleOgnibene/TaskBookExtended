@@ -56,9 +56,9 @@ class Render {
         return {tasks, complete, notes};
     }
 
-    _getComulativeTimeTaken(item) {
-        const comulativeTimeTaken = item.comulativeTimeTaken;
-        return !!comulativeTimeTaken ? ` Total: ${grey(this._getDurationFormatted(comulativeTimeTaken))}` : '';
+    _getCumulativeTimeTaken(item) {
+        const cumulativeTimeTaken = item.cumulativeTimeTaken;
+        return !!cumulativeTimeTaken ? ` Total: ${grey(this._getDurationFormatted(cumulativeTimeTaken))}` : '';
     }
 
     _getCurrentActiveTimeTaken(item) {
@@ -142,11 +142,11 @@ class Render {
         const age = this._getAge(item._timestamp);
         const star = this._getStar(item);
         const currentTimer = this._getCurrentActiveTimeTaken(item);
-        const comulativeTimeTaken = this._getComulativeTimeTaken(item);
+        const cumulativeTimeTaken = this._getCumulativeTimeTaken(item);
 
         const prefix = this._buildPrefix(item);
         const message = this._buildMessage(item);
-        let suffix = `${age.length === 0 ? age : ''}${currentTimer}${comulativeTimeTaken}`;
+        let suffix = `${age.length === 0 ? age : ''}${currentTimer}${cumulativeTimeTaken}`;
         if (suffix.length > 0) {
             suffix = `${green(' {')}${suffix}${green(' }')}`
         }
@@ -166,11 +166,11 @@ class Render {
         const boards = item.boards.filter(x => x !== 'Main board');
         const star = this._getStar(item);
         const currentTimer = this._getCurrentActiveTimeTaken(item);
-        const comulativeTimeTaken = this._getComulativeTimeTaken(item);
+        const cumulativeTimeTaken = this._getCumulativeTimeTaken(item);
 
         const prefix = this._buildPrefix(item);
         const message = this._buildMessage(item);
-        let suffix = `${currentTimer}${comulativeTimeTaken}${this._colorBoards(boards)}`;
+        let suffix = `${currentTimer}${cumulativeTimeTaken}${this._colorBoards(boards)}`;
         if (suffix.length > 0) {
             suffix = `${green(' {')}${suffix}${green(' }')}`
         }

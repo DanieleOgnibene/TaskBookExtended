@@ -8,7 +8,7 @@ class Task extends Item {
         this.isComplete = options.isComplete || false;
         this.inProgress = options.inProgress || false;
         this.inProgressActivationTime = options.inProgressActivationTime;
-        this.comulativeTimeTaken = options.comulativeTimeTaken;
+        this.cumulativeTimeTaken = options.cumulativeTimeTaken;
         this.isStarred = options.isStarred || false;
         this.priority = options.priority || 1;
     }
