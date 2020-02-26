@@ -127,6 +127,7 @@ class Storage {
 
     pushOnline() {
         const pushCommand = `git -C ${config.get().taskbookDirectory} commit -a -m "${new Date().toLocaleString('en-GB')}" && git -C ${config.get().taskbookDirectory} push`;
+        console.log('\n Saving...');
         exec(pushCommand, error => {
             if (error) {
                 console.log(`error: ${error.message}`);
