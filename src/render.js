@@ -6,7 +6,7 @@ const config = require('./config');
 signale.config({displayLabel: false});
 
 const {await: wait, error, log, note, pending, success} = signale;
-const {blue, green, grey, magenta, red, underline, yellow} = chalk;
+const {blue, green, grey, bold, magenta, red, underline, yellow, bgWhite} = chalk;
 
 const priorities = {2: 'yellow', 3: 'red'};
 
@@ -16,7 +16,11 @@ class Render {
     }
 
     _colorBoards(boards) {
-        return boards.map(x => grey(x)).join(' ');
+        const formattedBoards = boards.map(x => grey(x));
+        if (formattedBoards.length > 0) {
+            formattedBoards.unshift(' Boards:');
+        }
+        return formattedBoards.join(' ');
     }
 
     _isBoardComplete(items) {
@@ -27,7 +31,7 @@ class Render {
     _getAge(birthday) {
         const daytime = 24 * 60 * 60 * 1000;
         const age = Math.round(Math.abs((birthday - Date.now()) / daytime));
-        return (age === 0) ? '' : grey(`${age}d`);
+        return (age === 0) ? '' : ` Age: ${grey(age + 'd')}`;
     }
 
     _getCorrelation(items) {
@@ -52,8 +56,38 @@ class Render {
         return {tasks, complete, notes};
     }
 
+    _getComulativeTimeTaken(item) {
+        const comulativeTimeTaken = item.comulativeTimeTaken;
+        return !!comulativeTimeTaken ? ` Total: ${grey(this._getDurationFormatted(comulativeTimeTaken))}` : '';
+    }
+
+    _getCurrentActiveTimeTaken(item) {
+        const inProgressActivationTime = item.inProgressActivationTime;
+        return !!inProgressActivationTime ?
+            ` Timer: ${grey(this._getDurationFormatted(new Date().getTime() - inProgressActivationTime))}` :
+            '';
+    }
+
+    _getDurationFormatted(millisecondsNumber) {
+        const sec_num = millisecondsNumber / 1000;
+        let hours = Math.floor(sec_num / 3600);
+        let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        let seconds = Math.floor(sec_num - (hours * 3600) - (minutes * 60));
+
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        return hours + ':' + minutes + ':' + seconds;
+    }
+
     _getStar(item) {
-        return item.isStarred ? yellow('★') : '';
+        return item.isStarred ? yellow(' ★') : '';
     }
 
     _getBug(item) {
@@ -107,13 +141,20 @@ class Render {
         const {_isTask, isComplete, inProgress} = item;
         const age = this._getAge(item._timestamp);
         const star = this._getStar(item);
+        const currentTimer = this._getCurrentActiveTimeTaken(item);
+        const comulativeTimeTaken = this._getComulativeTimeTaken(item);
 
         const prefix = this._buildPrefix(item);
         const message = this._buildMessage(item);
-        const suffix = (age.length === 0) ? star : `${age} ${star}`;
-
+        let suffix = `${age.length === 0 ? age : ''}${currentTimer}${comulativeTimeTaken}`;
+        if (suffix.length > 0) {
+            suffix = `${green(' {')}${suffix}${green(' }')}`
+        }
+        suffix = `${star}${suffix}`;
+        if (isComplete) {
+            suffix = grey(suffix);
+        }
         const msgObj = {prefix, message, suffix};
-
         if (_isTask) {
             return isComplete ? success(msgObj) : inProgress ? wait(msgObj) : pending(msgObj);
         }
@@ -124,13 +165,20 @@ class Render {
         const {_isTask, isComplete, inProgress} = item;
         const boards = item.boards.filter(x => x !== 'Main board');
         const star = this._getStar(item);
+        const currentTimer = this._getCurrentActiveTimeTaken(item);
+        const comulativeTimeTaken = this._getComulativeTimeTaken(item);
 
         const prefix = this._buildPrefix(item);
         const message = this._buildMessage(item);
-        const suffix = `${this._colorBoards(boards)} ${star}`;
-
+        let suffix = `${currentTimer}${comulativeTimeTaken}${this._colorBoards(boards)}`;
+        if (suffix.length > 0) {
+            suffix = `${green(' {')}${suffix}${green(' }')}`
+        }
+        suffix = `${star}${suffix}`;
+        if (isComplete) {
+            suffix = grey(suffix);
+        }
         const msgObj = {prefix, message, suffix};
-
         if (_isTask) {
             return isComplete ? success(msgObj) : inProgress ? wait(msgObj) : pending(msgObj);
         }
@@ -364,7 +412,7 @@ class Render {
 
     successPriority(ids, level) {
         const prefix = '\n';
-        const message = `Updated priority of ${ ids.length > 1 ? 'ids' : 'id' }: ${grey(ids.join(', '))} to`;
+        const message = `Updated priority of ${ids.length > 1 ? 'ids' : 'id'}: ${grey(ids.join(', '))} to`;
         const suffix = level === '3' ? red('high') : (level === '2' ? yellow('medium') : green('normal'));
         success({prefix, message, suffix});
     }

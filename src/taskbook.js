@@ -419,8 +419,16 @@ class Taskbook {
         const todayDate = new Date().toDateString();
         started.forEach(id => {
             _data[id].activeDate = todayDate;
+            _data[id].inProgressActivationTime = new Date().getTime();
         });
-
+        paused.forEach(id => {
+            const task = _data[id];
+            const comulativeTimeTaken = task.comulativeTimeTaken || 0;
+            const inProgressActivationTime = task.inProgressActivationTime;
+            const timeTakenToAdd = !!inProgressActivationTime ? new Date().getTime() - inProgressActivationTime : 0;
+            _data[id].comulativeTimeTaken = comulativeTimeTaken + timeTakenToAdd;
+            _data[id].inProgressActivationTime = undefined;
+        });
         this._save(_data);
         render.markStarted(started);
         render.markPaused(paused);
