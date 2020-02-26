@@ -1,8 +1,15 @@
 {
-  "name": "taskbook-extended",
-  "productName": "TaskbookExtended",
-  "version": "1.0.0",
+  "name": "taskbook",
+  "productName": "Taskbook",
+  "version": "0.4.0",
   "description": "Tasks, boards & notes for the command-line habitat",
+  "repository": "klaussinani/taskbook",
+  "license": "MIT",
+  "author": {
+    "name": "Daniele Ognieben",
+    "email": "ognibenedaniele@hotmail.com",
+    "url": "https://github.com/DanieleOgnibene"
+  },
   "bin": {
     "tb": "cli.js"
   },
@@ -41,7 +48,6 @@
     "chalk": "^2.4.1",
     "clipboardy": "^1.2.3",
     "meow": "^5.0.0",
-    "moment": "^2.24.0",
     "signale": "1.4.0",
     "update-notifier": "^2.5.0"
   },

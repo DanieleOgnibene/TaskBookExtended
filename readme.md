@@ -92,6 +92,7 @@ snap alias taskbook tb # set alias
     Options
         none             Display board view
       --ai               Display timeline view by active date
+      --addBoard         Add boards to items
       --archive, -a      Display archived items
       --begin, -b        Start/pause task
       --bug              Toggle bug property      
@@ -108,6 +109,7 @@ snap alias taskbook tb # set alias
       --moveToToday      Move items with ids to today date
       --note, -n         Create note
       --priority, -p     Update priority of task
+      --removeBoard      Remove boards from items
       --resetDate        Move items with ids to their creation date
       --restore, -r      Restore items from archive
       --star, -s         Star/unstar item
@@ -119,6 +121,7 @@ snap alias taskbook tb # set alias
     Examples
       $ tb
       $ tb --ai
+      $ tb --addBoard 2 @newBoard @newBoard2
       $ tb --archive
       $ tb --begin 2 3
       $ tb --bug 2 3
@@ -134,6 +137,7 @@ snap alias taskbook tb # set alias
       $ tb --moveToToday 1 2
       $ tb --note @coding Mergesort worse-case O(nlogn)
       $ tb --priority @3 2
+      $ tb --removeBoard 3 2 @boardName @boardName2
       $ tb --resetDate 3 2
       $ tb --restore 4
       $ tb --star 2
@@ -246,6 +250,17 @@ To mark a task as started/paused, use the `--begin`/`-b` option followed by the 
 $ tb -b 2 3
 ```
 
+### Bug item
+
+To mark an item as bug/not-bug, use the `--bug` option followed by the ids of the target items. The functionality of this option is the same as `--check`/`--begin` option.
+```
+$ tb --bug 2 3    
+```
+To set an item as bug/not-bug while initializing it, include the b:x syntax in the task's description, where x can be a boolean value (default is false). 
+```
+tb -t @coding New issue b:true
+```
+
 ### Star Item
 
 To mark one or more items as favorite, use the `--star`/`-s` option followed by the ids of the target items. The functionality of this option is the same as the one of the above described `--check` option.
@@ -270,12 +285,36 @@ Invoking taskbook without any options will display all of saved items grouped in
 $ tb
 ```
 
+### Add boards
+
+To add multiple boards to target ids, the `--addBoard` option can be used.
+
+```
+$ tb --addBoard 1 2 @BoardName @BoardName2
+```
+
+### Remove boards
+
+To remove multiple boards to target ids, the `--removeBoard` option can be used.
+
+```
+$ tb --removeBoard 1 2 @BoardName @BoardName2
+```
+
 ### Display Timeline
 
 In order to display all items in a timeline view, based on their creation date, the `--timeline`/`-i` option can be used.
 
 ```
 $ tb -i
+```
+
+### Display Timeline by task active date
+
+In order to display all items in a timeline view, based on their active date, the `--ai` option can be used.
+
+```
+$ tb --ai
 ```
 
 ### Set Priority
@@ -290,10 +329,10 @@ To set a priority level for a task while initializing it, include the `p:x` synt
 $ tb -t @coding Fix issue `#42` p:3
 ```
 
-To update the priority level of a specific task after its creation, use the `--priority`/`-p` option along with the id the target task, prefixed by the `@` symbol, and an integer of value `1`, `2` or `3`. Note that the order in which the target id and priority level are placed is not significant.
+To update the priority level of multiple tasks after their creation, use the `--priority`/`-p` option along with the ids, prefixed by the `@` symbol, and an integer of value `1`, `2` or `3`. Note that the order in which the target ids and priority level are placed is not significant.
 
 ```
-$ tb -p @1 2
+$ tb -p @1 @3 2
 ```
 
 ### Move Item
@@ -302,6 +341,22 @@ To move an item to one or more boards, use the `--move`/`-m` option, followed by
 
 ```
 $ tb -m @1 myboard reviews
+```
+
+### Move Items to selected date
+
+To move items to a new date, use the `--moveToDate` option, followed by the target item ids, prefixed by the `@` symbol, and the name of the destination date (format is YYYY/MM/DD).
+
+```
+$ tb --moveToDate @1 @2 2020/02/25
+```
+
+### Move Items to today
+
+To move items to today, use the `--moveToToday` option, followed by the target item ids, prefixed by the `@` symbol.
+
+```
+$ tb --moveToToday @1 @2
 ```
 
 ### Delete Item
@@ -336,6 +391,14 @@ To restore one or more items, use the `--restore`/`-r` option followed by the id
 $ tb -r 1 2
 ```
 
+### Reset item active date
+
+To reset the active date of one or more items to their creation date, use the `--resetDate` option followed by the ids of the target items.
+
+```
+$ tb --resetDate 1 2
+```
+
 ### List Items
 
 To list a group of items where each item complies with a specific set of attributes, use the `--list`/`-l` option followed by the desired attributes. Board names along with item traits can be considered valid listing attributes. For example to list all items that belong to the default `myboard` and are pending tasks, the following could be used;
@@ -348,6 +411,7 @@ The by default supported listing attributes, together with their respective alia
 
 - `myboard` - Items that belong to `My board`
 - `task`, `tasks`, `todo` - Items that are tasks.
+- `bug`, `isBug` - Items that are bugs.
 - `note`, `notes` - Items that are notes.
 - `pending`, `unchecked`, `incomplete` - Items that are pending tasks.
 - `progress`, `started`, `begun` - Items that are in-progress tasks.

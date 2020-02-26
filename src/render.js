@@ -6,7 +6,7 @@ const config = require('./config');
 signale.config({displayLabel: false});
 
 const {await: wait, error, log, note, pending, success} = signale;
-const {blue, green, grey, bold, magenta, red, underline, yellow, bgWhite} = chalk;
+const {blue, green, grey, magenta, red, underline, yellow} = chalk;
 
 const priorities = {2: 'yellow', 3: 'red'};
 
@@ -253,26 +253,26 @@ class Render {
     }
 
     invalidCustomAppDir(path) {
-        const [prefix, suffix] = ['\n', red(path)];
+        const [prefix, suffix] = ['\n', red(path) + '\n'];
         const message = 'Custom app directory was not found on your system:';
         error({prefix, message, suffix});
     }
 
     invalidID(id) {
-        const [prefix, suffix] = ['\n', grey(id)];
+        const [prefix, suffix] = ['\n', grey(id) + '\n'];
         const message = 'Unable to find item with id:';
         error({prefix, message, suffix});
     }
 
     invalidIDsNumber() {
         const prefix = '\n';
-        const message = 'More than one ids were given as input';
+        const message = 'More than one ids were given as input' + '\n';
         error({prefix, message});
     }
 
     invalidPriority() {
         const prefix = '\n';
-        const message = 'Priority can only be 1, 2 or 3';
+        const message = 'Priority can only be 1, 2 or 3' + '\n';
         error({prefix, message});
     }
 
@@ -281,7 +281,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Checked ${ids.length > 1 ? 'tasks' : 'task'}:`;
         success({prefix, message, suffix});
     }
@@ -291,7 +291,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Unchecked ${ids.length > 1 ? 'tasks' : 'task'}:`;
         success({prefix, message, suffix});
     }
@@ -301,7 +301,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Started ${ids.length > 1 ? 'tasks' : 'task'}:`;
         success({prefix, message, suffix});
     }
@@ -311,7 +311,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Paused ${ids.length > 1 ? 'tasks' : 'task'}:`;
         success({prefix, message, suffix});
     }
@@ -321,7 +321,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Starred ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
@@ -331,7 +331,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Set ${ids.length > 1 ? 'items' : 'item'} as ${ids.length > 1 ? 'bugs' : 'bug'}:`;
         success({prefix, message, suffix});
     }
@@ -341,7 +341,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Set ${ids.length > 1 ? 'items' : 'item'} as not ${ids.length > 1 ? 'bugs' : 'bug'}:`;
         success({prefix, message, suffix});
     }
@@ -351,7 +351,7 @@ class Render {
             return;
         }
 
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Unstarred ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
@@ -359,53 +359,58 @@ class Render {
     missingBoards() {
         const prefix = '\n';
         const message = 'No boards were given as input';
-        error({prefix, message});
+        const suffix = '\n';
+        error({prefix, message, suffix});
     }
 
     missingDate() {
         const prefix = '\n';
         const message = 'No date was given as input';
-        error({prefix, message});
+        const suffix = '\n';
+        error({prefix, message, suffix});
     }
 
     invalidDate() {
         const prefix = '\n';
         const message = 'An invalid date was given as input';
-        error({prefix, message});
+        const suffix = '\n';
+        error({prefix, message, suffix});
     }
 
     missingDesc() {
         const prefix = '\n';
         const message = 'No description was given as input';
-        error({prefix, message});
+        const suffix = '\n';
+        error({prefix, message, suffix});
     }
 
     missingID() {
         const prefix = '\n';
         const message = 'No id was given as input';
-        error({prefix, message});
+        const suffix = '\n';
+        error({prefix, message, suffix});
     }
 
     successCreate({_id, _isTask}) {
-        const [prefix, suffix] = ['\n', grey(_id)];
+        const [prefix, suffix] = ['\n', grey(_id) + '\n'];
         const message = `Created ${_isTask ? 'task:' : 'note:'}`;
         success({prefix, message, suffix});
     }
 
     successEdit(id) {
-        const [prefix, suffix] = ['\n', grey(id)];
+        const [prefix, suffix] = ['\n', grey(id) + '\n'];
         const message = 'Updated description of item:';
         success({prefix, message, suffix});
     }
 
     successDelete(ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Deleted ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
 
     successMove(id, boards) {
-        const [prefix, suffix] = ['\n', grey(boards.join(', '))];
+        const [prefix, suffix] = ['\n', grey(boards.join(', ')) + '\n'];
         const message = `Move item: ${grey(id)} to`;
         success({prefix, message, suffix});
     }
@@ -413,49 +418,50 @@ class Render {
     successPriority(ids, level) {
         const prefix = '\n';
         const message = `Updated priority of ${ids.length > 1 ? 'ids' : 'id'}: ${grey(ids.join(', '))} to`;
-        const suffix = level === '3' ? red('high') : (level === '2' ? yellow('medium') : green('normal'));
+        let suffix = level === '3' ? red('high') : (level === '2' ? yellow('medium') : green('normal'));
+        suffix += '\n';
         success({prefix, message, suffix});
     }
 
     successRestore(ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Restored ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
 
     successMoveToToday(ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `${ids.length > 1 ? 'Items' : 'Item'} moved to today:`;
         success({prefix, message, suffix});
     }
 
     successMoveToDate(date, ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `${ids.length > 1 ? 'Items' : 'Item'} with ${ids.length > 1 ? 'ids' : 'id'} ${suffix} moved to date ${grey(date)}`;
         success({prefix, message});
     }
 
     successAddBoard(boards, ids) {
-        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', '))];
+        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
         const message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} added to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
         success({message});
     }
 
     successRemoveBoard(boards, ids) {
-        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', '))];
-        const message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} removed from ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
+        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
+        let message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} removed from ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
         success({message});
     }
 
     successResetDate(ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
-        const message = `${ids.length > 1 ? 'Items' : 'Item'} moved to creation date:`;
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `${ids.length > 1 ? 'Items' : 'Item'} moved to creation date:`;
         success({prefix, message, suffix});
     }
 
     successCopyToClipboard(ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', '))];
-        const message = `Copied the ${ids.length > 1 ? 'descriptions of items' : 'description of item'}:`;
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `Copied the ${ids.length > 1 ? 'descriptions of items' : 'description of item'}:`;
         success({prefix, message, suffix});
     }
 }

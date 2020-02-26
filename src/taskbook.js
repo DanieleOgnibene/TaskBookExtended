@@ -137,7 +137,7 @@ class Taskbook {
         const description = desc.join(' ');
 
         if (boards.length === 0) {
-            boards.push('Main board');
+            boards.push('My board');
         }
 
         return {boards, description, id, priority, isBug};
@@ -633,7 +633,7 @@ class Taskbook {
         const id = this._validateIDs(target.replace('@', ''));
 
         input.filter(x => x !== target).forEach(x => {
-            boards.push(x === 'mainboard' ? 'Main board' : `@${x}`);
+            boards.push(x === 'myboard' ? 'My board' : `@${x}`);
         });
 
         if (boards.length === 0) {
