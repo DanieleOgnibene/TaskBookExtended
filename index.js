@@ -115,7 +115,7 @@ const taskbookCLI = (input, flags) => {
         return taskbook.clear();
     }
 
-    taskbook.displayByBoard();
+    taskbook.displayByActiveDate();
     return taskbook.displayStats();
 };
 
