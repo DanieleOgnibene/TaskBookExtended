@@ -408,6 +408,7 @@ class Taskbook {
         const [started, paused] = [[], []];
         ids.forEach(id => {
             if (_data[id]._isTask) {
+                _data[id].isComplete = false;
                 return _data[id].inProgress ? paused.push(id) : started.push(id);
             }
         });
@@ -431,7 +432,6 @@ class Taskbook {
             const inProgressActivationTime = task.inProgressActivationTime;
             const timeTakenToAdd = !!inProgressActivationTime ? new Date().getTime() - inProgressActivationTime : 0;
             _data[id].inProgress = false;
-            _data[id].isComplete = false;
             _data[id].comulativeTimeTaken = comulativeTimeTaken + timeTakenToAdd;
             _data[id].inProgressActivationTime = undefined;
         });
