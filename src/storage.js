@@ -89,7 +89,6 @@ class Storage {
 
     get() {
         let data = {};
-
         if (fs.existsSync(this._mainStorageFile)) {
             const content = fs.readFileSync(this._mainStorageFile, 'utf8');
             data = JSON.parse(content);
@@ -112,7 +111,6 @@ class Storage {
     set(data) {
         data = JSON.stringify(data, null, 4);
         const tempStorageFile = this._getTempFile(this._mainStorageFile);
-
         fs.writeFileSync(tempStorageFile, data, 'utf8');
         fs.renameSync(tempStorageFile, this._mainStorageFile);
     }
@@ -127,13 +125,13 @@ class Storage {
 
     pushOnline() {
         const pushCommand = `git -C ${config.get().taskbookDirectory} commit -a -m "${new Date().toLocaleString('en-GB')}" && git -C ${config.get().taskbookDirectory} push`;
-        console.log('\n Saving...');
+        console.log('\n  Saving...\n');
         exec(pushCommand, error => {
             if (error) {
-                console.log(`error: ${error.message}`);
+                console.log(`  Error: ${error.message} \n`);
                 return;
             }
-            console.log('\n Saved! \n');
+            console.log('  Saved! \n');
         });
     }
 }
