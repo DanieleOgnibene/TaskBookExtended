@@ -443,31 +443,31 @@ class Render {
     }
 
     successMoveToDate(date, ids) {
-        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
-        const message = `${ids.length > 1 ? 'Items' : 'Item'} with ${ids.length > 1 ? 'ids' : 'id'} ${suffix} moved to date ${grey(date)}`;
-        success({prefix, message});
+        const [prefix, suffix] = ['\n', '\n'];
+        const message = `${ids.length > 1 ? 'Items' : 'Item'} with ${ids.length > 1 ? 'ids' : 'id'} ${grey(ids.join(', '))} moved to date ${grey(date)}`;
+        success({prefix, message, suffix});
     }
 
     successAddBoard(boards, ids) {
-        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
+        const [prefix, suffix] = ['\n' + grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
         const message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} added to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
         success({message});
     }
 
     successRemoveBoard(boards, ids) {
-        const [prefix, suffix] = [grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
+        const [prefix, suffix] = ['\n' + grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
         let message = `${prefix} ${boards.length > 1 ? 'boards' : 'board'} removed from ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
         success({message});
     }
 
     successAddTime(time, ids) {
-        const [prefix, suffix] = [grey(time), grey(ids.join(', ')) + '\n'];
+        const [prefix, suffix] = ['\n' + grey(time), grey(ids.join(', ')) + '\n'];
         let message = `${prefix} minutes added to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
         success({message});
     }
 
     successRemoveTime(time, ids) {
-        const [prefix, suffix] = [grey(time), grey(ids.join(', ')) + '\n'];
+        const [prefix, suffix] = ['\n' + grey(time), grey(ids.join(', ')) + '\n'];
         let message = `${prefix} minutes removed to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
         success({message});
     }

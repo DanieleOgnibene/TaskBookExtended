@@ -86,7 +86,7 @@ Usage
     Options
         none             Display board view
       --ai               Display timeline view by active date
-      --addBoard         Add a board to an item
+      --addBoard         Add a board (@BoardName) to target ids
       --addTime          Add the amount of minutes to target ids (@ids)
       --removeTime       Remove the amount of minutes to target ids (@ids)
       --archive, -a      Display archived items
