@@ -670,6 +670,70 @@ class Taskbook {
         render.successResetDate(ids);
     }
 
+    clearTimer(ids) {
+        ids = this._validateIDs(ids);
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].inProgressActivationTime = undefined;
+        });
+        this._save(_data);
+        render.successClearTimer(ids);
+    }
+
+    clearTime(ids) {
+        ids = this._validateIDs(ids);
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].comulativeTimeTaken = 0;
+        });
+        this._save(_data);
+        render.successClearTime(ids);
+    }
+
+    addTime(input) {
+        const targets = input.filter(x => x.startsWith('@'));
+        const time = input.filter(x => !x.startsWith('@')).reduce((acc, curr) => +acc + +curr);
+        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        if (time === 0) {
+            render.missingTimeValue();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].comulativeTimeTaken += time * 60000;
+        });
+        this._save(_data);
+        render.successAddTime(time, ids);
+    }
+
+    removeTime(input) {
+        const targets = input.filter(x => x.startsWith('@'));
+        let time = input.filter(x => !x.startsWith('@')).reduce((acc, curr) => +acc + +curr);
+        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        if (time === 0) {
+            render.missingTimeValue();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].comulativeTimeTaken -= time * 60000;
+            if (_data[id].comulativeTimeTaken < 0) {
+                time = +time + _data[id].comulativeTimeTaken / 60000;
+                _data[id].comulativeTimeTaken = 0;
+            }
+        });
+        this._save(_data);
+        render.successRemoveTime(time, ids);
+    }
+
     restoreItems(ids) {
         ids = this._validateIDs(ids, this._getIDs(this._archive));
         const {_archive} = this;

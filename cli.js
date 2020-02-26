@@ -96,6 +96,22 @@ const cli = meow(help, {
       type: 'boolean',
       alias: 'resetDate'
     },
+    clearTimer: {
+      type: 'boolean',
+      alias: 'clearTimer'
+    },
+    clearTime: {
+      type: 'boolean',
+      alias: 'clearTime'
+    },
+    addTime: {
+      type: 'boolean',
+      alias: 'addTime'
+    },
+    removeTime: {
+      type: 'boolean',
+      alias: 'removeTime'
+    },
     addBoard: {
       type: 'boolean',
       alias: 'addBoard'

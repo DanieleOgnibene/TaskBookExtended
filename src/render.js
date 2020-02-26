@@ -363,6 +363,13 @@ class Render {
         error({prefix, message, suffix});
     }
 
+    missingTimeValue() {
+        const prefix = '\n';
+        const message = 'No time value (minutes) was given as input';
+        const suffix = '\n';
+        error({prefix, message, suffix});
+    }
+
     missingDate() {
         const prefix = '\n';
         const message = 'No date was given as input';
@@ -453,9 +460,33 @@ class Render {
         success({message});
     }
 
+    successAddTime(time, ids) {
+        const [prefix, suffix] = [grey(time), grey(ids.join(', ')) + '\n'];
+        let message = `${prefix} minutes added to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
+        success({message});
+    }
+
+    successRemoveTime(time, ids) {
+        const [prefix, suffix] = [grey(time), grey(ids.join(', ')) + '\n'];
+        let message = `${prefix} minutes removed to ${ids.length > 1 ? 'items' : 'item'} ${suffix}`;
+        success({message});
+    }
+
     successResetDate(ids) {
         const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         let message = `${ids.length > 1 ? 'Items' : 'Item'} moved to creation date:`;
+        success({prefix, message, suffix});
+    }
+
+    successClearTimer(ids) {
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `Cleared timer of ${ids.length > 1 ? 'items' : 'item'}:`;
+        success({prefix, message, suffix});
+    }
+
+    successClearTime(ids) {
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `Cleared total time from ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
 

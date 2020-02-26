@@ -8,6 +8,7 @@ module.exports = `
         none             Display board view
       --ai               Display timeline view by active date
       --addBoard         Add a board to an item
+      --addTime          Add the amount of minutes to target ids (@ids)
       --archive, -a      Display archived items
       --begin, -b        Start/pause task
       --bug              Toggle bug property      
@@ -15,17 +16,19 @@ module.exports = `
       --clear            Delete all checked items
       --copy, -y         Copy item description
       --delete, -d       Delete item
-      --edit, -e         Edit item description
+      --edit, -e         Edit item (@id) description
       --find, -f         Search for items
       --help, -h         Display help message
       --list, -l         List items by attributes
-      --move, -m         Move item between boards
+      --move, -m         Move item (@ids) between boards
       --moveToDate       Move items with ids (@ids) to selected date (YYYY/MM/DD)
       --moveToToday      Move items with ids to today date
       --note, -n         Create note
-      --priority, -p     Update priority of task
+      --priority, -p     Update priority of tasks (@ids)
       --removeBoard      Remove a board from an item
       --resetDate        Move items with ids to their creation date
+      --clearTimer       Clear timer from target ids
+      --clearTime        Clear total time from target ids
       --restore, -r      Restore items from archive
       --star, -s         Star/unstar item
       --task, -t         Create task
@@ -37,6 +40,7 @@ module.exports = `
       $ tb
       $ tb --ai
       $ tb --addBoard 2 @newBoard
+      $ tb --addTime @3 @5 40
       $ tb --archive
       $ tb --begin 2 3
       $ tb --bug 2 3
@@ -55,6 +59,8 @@ module.exports = `
       $ tb --removeBoard 3 @boardName
       $ tb --resetDate 3 2
       $ tb --restore 4
+      $ tb --clearTimer 3 5 
+      $ tb --clearTime 3 5
       $ tb --star 2
       $ tb --task @coding @reviews Review PR #42
       $ tb --task @coding Improve documentation

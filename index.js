@@ -95,6 +95,22 @@ const taskbookCLI = (input, flags) => {
         return taskbook.resetDate(input);
     }
 
+    if (flags.clearTimer) {
+        return taskbook.clearTimer(input);
+    }
+
+    if (flags.clearTime) {
+        return taskbook.clearTime(input);
+    }
+
+    if (flags.addTime) {
+        return taskbook.addTime(input);
+    }
+
+    if (flags.removeTime) {
+        return taskbook.removeTime(input);
+    }
+
     if (flags.clear) {
         return taskbook.clear();
     }
