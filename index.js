@@ -3,6 +3,10 @@
 const taskbook = require('./src/taskbook');
 
 const taskbookCLI = (input, flags) => {
+    if (flags.initDir) {
+        return taskbook.saveNewTaskbookDirectory(input);
+    }
+
     if (flags.archive) {
         return taskbook.displayArchive();
     }

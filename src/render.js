@@ -252,10 +252,34 @@ class Render {
         log({prefix: ' ', message: status.join(grey(' · ')), suffix: '\n'});
     }
 
-    invalidCustomAppDir(path) {
-        const [prefix, suffix] = ['\n', red(path) + '\n'];
-        const message = 'Custom app directory was not found on your system:';
+    errorMessage(errorMessage) {
+        const [prefix, suffix] = ['\n', '\n'];
+        const message = `Error: ${red(errorMessage)}`;
         error({prefix, message, suffix});
+    }
+
+    successSaveData() {
+        const [prefix, suffix] = ['\n', '\n'];
+        const message = `Saved!`;
+        success({prefix, message, suffix});
+    }
+
+    savingData() {
+        const [prefix, suffix] = ['\n', '\n'];
+        const message = `Saving...`;
+        wait({prefix, message, suffix});
+    }
+
+    invalidCustomAppDir(path) {
+        const [prefix, suffix] = ['\n', '\n'];
+        const message = `No directory found at ${red(path)}, a new one will be created when needed.`;
+        wait({prefix, message, suffix});
+    }
+
+    savedCustomAppDir() {
+        const [prefix, suffix] = ['\n', '\n'];
+        const message = `New directory path set!`;
+        success({prefix, message, suffix});
     }
 
     invalidID(id) {

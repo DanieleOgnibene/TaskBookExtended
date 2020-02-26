@@ -81,11 +81,12 @@ snap alias taskbook tb # set alias
 ## Usage
 
 Usage
-    Usage
         $ tb [<options> ...]
     
         Options
             none             Display timeline view by active date
+          --initDir          Init main directory (it is used to push data to GitHub)
+          --save             Commit and push the changes in the default folder specified in taskbook.json (remember to init git)
           --boards           Display all boards
           --addBoard         Add a board (@BoardName) to target ids
           --addTime          Add the amount of minutes to target ids (@ids)
@@ -118,6 +119,8 @@ Usage
     
         Examples
           $ tb
+          $ tb --initDir path
+          $ tb --save
           $ tb --boards
           $ tb --addBoard 2 @newBoard
           $ tb --addTime @3 @5 40
@@ -209,6 +212,14 @@ Display progress overview below the timeline and board views.
 
 The following is a minor walkthrough containing a set of examples on how to use taskbook.
 In case you spotted an error or think that an example is not to clear enough and should be further improved, please feel free to open an [issue](https://github.com/klaussinani/taskbook/issues/new/choose) or [pull request](https://github.com/klaussinani/taskbook/compare).
+
+### Initialize main directory path
+
+To initialize the main directory path `--initDir` option with the complete path.
+
+```
+$ tb -initDir path/path
+```
 
 ### Create Task
 

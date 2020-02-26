@@ -6,6 +6,7 @@ module.exports = `
     
         Options
             none             Display timeline view by active date
+          --initDir          Init main directory (it is used to push data to GitHub)
           --save             Commit and push the changes in the default folder specified in taskbook.json (remember to init git)
           --boards           Display all boards
           --addBoard         Add a board (@BoardName) to target ids
@@ -39,6 +40,7 @@ module.exports = `
     
         Examples
           $ tb
+          $ tb --initDir path
           $ tb --save
           $ tb --boards
           $ tb --addBoard 2 @newBoard

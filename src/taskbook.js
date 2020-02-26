@@ -366,6 +366,10 @@ class Taskbook {
         this._save(_data);
     }
 
+    saveNewTaskbookDirectory(inputs) {
+        this._storage.saveNewTaskbookDirectory(inputs.join());
+    }
+
     createNote(desc) {
         const {id, description, boards, isBug} = this._getOptions(desc);
         const note = new Note({id, description, boards, isBug});

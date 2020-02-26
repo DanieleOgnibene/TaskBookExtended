@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 'use strict';
-const crypto = require('crypto');
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 const config = require('./config');
 const render = require('./render');
 const {exec} = require("child_process");
+const {write} = require('./utils/file-writer');
 
-const {basename, join} = path;
+const {join} = path;
 
 class Storage {
     constructor() {
@@ -22,19 +21,7 @@ class Storage {
     }
 
     get _mainAppDir() {
-        const {taskbookDirectory} = config.get();
-        const defaultAppDirectory = join(os.homedir(), '.taskbook');
-
-        if (!taskbookDirectory) {
-            return defaultAppDirectory;
-        }
-
-        if (!fs.existsSync(taskbookDirectory)) {
-            render.invalidCustomAppDir(taskbookDirectory);
-            process.exit(1);
-        }
-
-        return taskbookDirectory;
+        return config.get().taskbookDirectory;
     }
 
     _ensureMainAppDir() {
@@ -77,15 +64,6 @@ class Storage {
         this._cleanTempDir();
     }
 
-    _getRandomHexString(length = 8) {
-        return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
-    }
-
-    _getTempFile(filePath) {
-        const randomString = this._getRandomHexString();
-        const tempFilename = basename(filePath).split('.').join(`.TEMP-${randomString}.`);
-        return join(this._tempDir, tempFilename);
-    }
 
     get() {
         let data = {};
@@ -109,30 +87,31 @@ class Storage {
     }
 
     set(data) {
-        data = JSON.stringify(data, null, 4);
-        const tempStorageFile = this._getTempFile(this._mainStorageFile);
-        fs.writeFileSync(tempStorageFile, data, 'utf8');
-        fs.renameSync(tempStorageFile, this._mainStorageFile);
+        write(data, this._mainStorageFile, this._tempDir);
     }
 
     setArchive(archive) {
-        const data = JSON.stringify(archive, null, 4);
-        const tempArchiveFile = this._getTempFile(this._archiveFile);
-
-        fs.writeFileSync(tempArchiveFile, data, 'utf8');
-        fs.renameSync(tempArchiveFile, this._archiveFile);
+        write(archive, this._archiveFile, this._tempDir);
     }
 
     pushOnline() {
         const pushCommand = `git -C ${config.get().taskbookDirectory} commit -a -m "${new Date().toLocaleString('en-GB')}" && git -C ${config.get().taskbookDirectory} push`;
-        console.log('\n  Saving...\n');
-        exec(pushCommand, error => {
+        render.savingData();
+        exec(pushCommand, (error, gitError) => {
             if (error) {
-                console.log(`  Error: ${error.message} \n`);
+                render.errorMessage(gitError);
                 return;
             }
-            console.log('  Saved! \n');
+            render.successSaveData();
         });
+    }
+
+    saveNewTaskbookDirectory(newDirectory) {
+        if (!fs.existsSync(newDirectory)) {
+            render.invalidCustomAppDir(newDirectory);
+        }
+        config.setNewTaskbookDirectory(newDirectory);
+        render.savedCustomAppDir();
     }
 }
 
