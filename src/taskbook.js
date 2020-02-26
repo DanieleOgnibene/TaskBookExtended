@@ -390,16 +390,14 @@ class Taskbook {
         ids = this._validateIDs(ids);
         const {_data} = this;
         const [checked, unchecked] = [[], []];
-
         ids.forEach(id => {
             if (_data[id]._isTask) {
-                _data[id].inProgress = false;
                 _data[id].isComplete = !_data[id].isComplete;
                 return _data[id].isComplete ? checked.push(id) : unchecked.push(id);
             }
         });
-
         this._save(_data);
+        this._updateTimersByStartedAndPausedTasks([], checked);
         render.markComplete(checked);
         render.markIncomplete(unchecked);
     }
@@ -410,15 +408,21 @@ class Taskbook {
         const [started, paused] = [[], []];
         ids.forEach(id => {
             if (_data[id]._isTask) {
-                _data[id].isComplete = false;
-                _data[id].inProgress = !_data[id].inProgress;
-                return _data[id].inProgress ? started.push(id) : paused.push(id);
+                return _data[id].inProgress ? paused.push(id) : started.push(id);
             }
         });
+        this._updateTimersByStartedAndPausedTasks(started, paused);
+        render.markStarted(started);
+        render.markPaused(paused);
+    }
 
+    _updateTimersByStartedAndPausedTasks(started, paused) {
+        const {_data} = this;
         const todayDate = new Date().toDateString();
         started.forEach(id => {
             _data[id].activeDate = todayDate;
+            _data[id].inProgress = true;
+            _data[id].isComplete = false;
             _data[id].inProgressActivationTime = new Date().getTime();
         });
         paused.forEach(id => {
@@ -426,12 +430,12 @@ class Taskbook {
             const comulativeTimeTaken = task.comulativeTimeTaken || 0;
             const inProgressActivationTime = task.inProgressActivationTime;
             const timeTakenToAdd = !!inProgressActivationTime ? new Date().getTime() - inProgressActivationTime : 0;
+            _data[id].inProgress = false;
+            _data[id].isComplete = false;
             _data[id].comulativeTimeTaken = comulativeTimeTaken + timeTakenToAdd;
             _data[id].inProgressActivationTime = undefined;
         });
         this._save(_data);
-        render.markStarted(started);
-        render.markPaused(paused);
     }
 
     createTask(desc) {
