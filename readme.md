@@ -10,12 +10,6 @@
   <img alt="Boards" width="60%" src="media/header-boards.png"/>
 </div>
 
-<p align="center">
-  <a href="https://travis-ci.com/klaussinani/taskbook">
-    <img alt="Build Status" src="https://travis-ci.com/klaussinani/taskbook.svg?branch=master">
-  </a>
-</p>
-
 ## Description
 
 By utilizing a simple and minimal usage syntax, that requires a flat learning curve, taskbook enables you to effectively manage your tasks and notes across multiple boards from within your terminal. All data are written atomically to the storage in order to prevent corruptions, and are never shared with anyone or anything. Deleted items are automatically archived and can be inspected or restored at any moment.
