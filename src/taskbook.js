@@ -818,6 +818,10 @@ class Taskbook {
 
         this.deleteItems(ids);
     }
+
+    save() {
+        this._storage.pushOnline();
+    }
 }
 
 module.exports = new Taskbook();

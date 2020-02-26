@@ -6,6 +6,7 @@ const os = require('os');
 const path = require('path');
 const config = require('./config');
 const render = require('./render');
+const {exec} = require("child_process");
 
 const {basename, join} = path;
 
@@ -33,7 +34,7 @@ class Storage {
             process.exit(1);
         }
 
-        return join(taskbookDirectory, '.taskbook');
+        return taskbookDirectory;
     }
 
     _ensureMainAppDir() {
@@ -122,6 +123,17 @@ class Storage {
 
         fs.writeFileSync(tempArchiveFile, data, 'utf8');
         fs.renameSync(tempArchiveFile, this._archiveFile);
+    }
+
+    pushOnline() {
+        const pushCommand = `git -C ${config.get().taskbookDirectory} commit -a -m "${new Date().toLocaleString('en-GB')}" && git -C ${config.get().taskbookDirectory} push`;
+        exec(pushCommand, error => {
+            if (error) {
+                console.log(`error: ${error.message}`);
+                return;
+            }
+            console.log('\n Saved! \n');
+        });
     }
 }
 

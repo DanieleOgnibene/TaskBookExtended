@@ -52,8 +52,8 @@ const taskbookCLI = (input, flags) => {
         return taskbook.displayStats();
     }
 
-    if (flags.activeTimeLine) {
-        taskbook.displayByActiveDate();
+    if (flags.boards) {
+        taskbook.displayByBoard();
         return taskbook.displayStats();
     }
 
@@ -113,6 +113,10 @@ const taskbookCLI = (input, flags) => {
 
     if (flags.clear) {
         return taskbook.clear();
+    }
+
+    if (flags.save) {
+        return taskbook.save();
     }
 
     taskbook.displayByActiveDate();

@@ -60,9 +60,9 @@ const cli = meow(help, {
       type: 'boolean',
       alias: 'i'
     },
-    activeTimeLine: {
+    boards: {
       type: 'boolean',
-      alias: 'ai'
+      alias: 'boards'
     },
     priority: {
       type: 'boolean',
@@ -121,6 +121,9 @@ const cli = meow(help, {
       alias: 'removeBoard'
     },
     clear: {
+      type: 'boolean'
+    },
+    save: {
       type: 'boolean'
     }
   }
