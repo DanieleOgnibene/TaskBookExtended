@@ -1,5 +1,5 @@
 <h1 align="center">
-  Taskbook
+  TaskbookExtended
 </h1>
 
 <h4 align="center">
