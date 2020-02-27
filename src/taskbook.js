@@ -298,8 +298,19 @@ class Taskbook {
                     break;
             }
         });
-
+        const dateAttrIdentifier = 'date:';
+        const dateAttr = attr.find(att => att.startsWith(dateAttrIdentifier));
+        if (!!dateAttr) {
+            const dateInput = this._convertDateStringInput(dateAttr.replace(dateAttrIdentifier, ''));
+            data = this._filterByDate(data, dateInput);
+        }
         return data;
+    }
+
+    _filterByDate(data, date) {
+        return Object.keys(data)
+            .filter(id => data[id].deadline === date)
+            .map(id => data[id]);
     }
 
     _groupByBoard(data = this._data, boards = this._getBoards()) {
