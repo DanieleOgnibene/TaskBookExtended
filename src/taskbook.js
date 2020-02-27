@@ -460,6 +460,9 @@ class Taskbook {
         const storedBoards = this._getBoards();
 
         terms.forEach(x => {
+            if (storedBoards.indexOf(x) !== -1) {
+                return boards.push(x);
+            }
             if (storedBoards.indexOf(`@${x}`) === -1) {
                 return x === 'myboard' ? boards.push('My Board') : attributes.push(x);
             }
