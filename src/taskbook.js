@@ -157,13 +157,15 @@ class Taskbook {
         return {boards, description, id, priority, isBug, deadline};
     }
 
-    _getStats() {
-        const {_data} = this;
+    _getStats(data = this._data) {
         let [complete, inProgress, pending, notes] = [0, 0, 0, 0];
+        let totalTime = 0;
 
-        Object.keys(_data).forEach(id => {
-            if (_data[id]._isTask) {
-                return _data[id].isComplete ? complete++ : _data[id].inProgress ? inProgress++ : pending++;
+        Object.keys(data).forEach(id => {
+            const item = data[id];
+            if (item._isTask) {
+                totalTime += +item.cumulativeTimeTaken;
+                return item.isComplete ? complete++ : item.inProgress ? inProgress++ : pending++;
             }
 
             return notes++;
@@ -172,7 +174,7 @@ class Taskbook {
         const total = complete + pending + inProgress;
         const percent = (total === 0) ? 0 : Math.floor(complete * 100 / total);
 
-        return {percent, complete, inProgress, pending, notes};
+        return {percent, complete, inProgress, pending, notes, totalTime};
     }
 
     _hasTerms(string, terms) {
@@ -456,10 +458,16 @@ class Taskbook {
     }
 
     _getBoardsAndAttributes(terms) {
-        let [boards, attributes] = [[], []];
+        let [boards, attributes, linkedBoards] = [[], [], []];
         const storedBoards = this._getBoards();
 
         terms.forEach(x => {
+            if (x.includes('-@')) {
+                const [firstBoard, secondBoard] = x.split('-');
+                if (firstBoard.startsWith('@')) {
+                    linkedBoards.push(firstBoard, secondBoard);
+                }
+            }
             if (storedBoards.indexOf(x) !== -1) {
                 return boards.push(x);
             }
@@ -470,15 +478,24 @@ class Taskbook {
             return boards.push(`@${x}`);
         });
 
-        return [boards, attributes].map(x => this._removeDuplicates(x));
+        return [boards, attributes, linkedBoards].map(x => this._removeDuplicates(x));
     }
 
     _getGroupedByBoardAndFiltered(terms) {
         const boardsAndAttributes = this._getBoardsAndAttributes(terms);
         const boards = boardsAndAttributes[0];
         const attributes = boardsAndAttributes[1];
+        const linkedBoards = boardsAndAttributes[2];
         const data = this._filterByAttributes(attributes);
-        return this._groupByBoard(data, boards);
+        return this._groupByBoard(this._filterDataByLinkedBoards(data, linkedBoards), boards);
+    }
+
+    _filterDataByLinkedBoards(data, linkedBoards) {
+        const idsFiltered = Object.keys(data)
+            .filter(
+                id => linkedBoards.every(linkedBoard => data[id].boards.some(board => board === linkedBoard))
+            );
+        return idsFiltered.map(id => data[id]);
     }
 
     createTask(desc) {
@@ -520,8 +537,8 @@ class Taskbook {
         render.displayByDate(this._groupByDeadline());
     }
 
-    displayStats() {
-        render.displayStats(this._getStats());
+    displayStats(data = this._data) {
+        render.displayStats(this._getStats(data));
     }
 
     editDescription(input) {
@@ -573,10 +590,10 @@ class Taskbook {
 
     displayTable(terms) {
         const groupedByBoardAndFiltered = this._getGroupedByBoardAndFiltered(terms);
-        let resultItems = [];
-        Object.keys(groupedByBoardAndFiltered).forEach(board => resultItems.push(...groupedByBoardAndFiltered[board]));
-        resultItems = Array.from(new Set(resultItems));
-        resultItems = resultItems.filter(item => item._isTask).map(item => {
+        const taskItemsToBeDisplayed = [];
+        Object.keys(groupedByBoardAndFiltered).forEach(board => taskItemsToBeDisplayed.push(...groupedByBoardAndFiltered[board]));
+        const uniqueTaskItemsToBeDisplayed = Array.from(new Set(taskItemsToBeDisplayed)).filter(item => item._isTask);
+        const resultTableItems = uniqueTaskItemsToBeDisplayed.map(item => {
             const newTableItem = {
                 'ID': item._id,
                 'Boards': item.boards,
@@ -593,10 +610,13 @@ class Taskbook {
             }
             return newTableItem;
         });
-        this._sortDataByTerms(terms, resultItems);
-        console.log('\n');
-        console.table(resultItems);
-        console.log('\n');
+        this._sortDataByTerms(terms, resultTableItems);
+        this._displayTableWithStats(resultTableItems);
+    }
+
+    _displayTableWithStats(resultTableItems) {
+        render.displayByTable(resultTableItems);
+        this.displayStats(resultTableItems.map(resultItem => this._data[resultItem.ID]));
     }
 
     _sortDataByTerms(terms, data) {

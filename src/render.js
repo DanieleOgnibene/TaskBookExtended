@@ -226,7 +226,7 @@ class Render {
             );
     }
 
-    displayStats({percent, complete, inProgress, pending, notes}) {
+    displayStats({percent, complete, inProgress, pending, notes, totalTime}) {
         if (!this._configuration.displayProgressOverview) {
             return;
         }
@@ -248,8 +248,17 @@ class Render {
             log({prefix: '\n ', message: 'Type `tb --help` to get started!', suffix: yellow('★')});
         }
 
-        log({prefix: '\n ', message: grey(`${percent} of all tasks complete.`)});
+        log({
+            prefix: '\n ',
+            message: `${percent} ${grey('of all tasks complete')}`,
+            suffix: `${totalTime > 0 ? `${grey('· Total time ')}${magenta(this._getDurationFormatted(totalTime))}` : ''}`
+        });
         log({prefix: ' ', message: status.join(grey(' · ')), suffix: '\n'});
+    }
+
+    displayByTable(items) {
+        console.log('\n');
+        console.table(items);
     }
 
     errorMessage(errorMessage) {

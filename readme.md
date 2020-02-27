@@ -447,7 +447,7 @@ $ tb --removeTime @3 @5 40
 To list a group of items where each item complies with a specific set of attributes, use the `--list`/`-l` option followed by the desired attributes. Board names along with item traits can be considered valid listing attributes. For example to list all items that belong to the default `myboard` and are pending tasks, the following could be used;
 
 ```
-$ tb -l myboard pending
+$ tb -l myboard @customBoard pending
 ```
 
 The by default supported listing attributes, together with their respective aliases, are the following;
@@ -460,6 +460,21 @@ The by default supported listing attributes, together with their respective alia
 - `progress`, `started`, `begun` - Items that are in-progress tasks.
 - `done`, `checked`, `complete` - Items that complete tasks.
 - `star`, `starred` - Items that are starred.
+
+There is also the possibility to do search for linked boards that will search for items that has all the linked boards.
+
+```
+$ tb -l @customBoard-@secondCustomBoard
+```
+
+### List Items As Table
+
+To display in a table the items where each item complies with a specific se of attributes, use the `--table` option followed by the desired attributes.
+The modifiers are the same as for the `---list` option.
+
+```
+$ tb --table @customBoard-@secondCustomBoard pending
+```
 
 ### Search Items
 
