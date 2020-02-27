@@ -482,26 +482,26 @@ class Render {
     }
 
     successAddBoard(boards, ids) {
-        const [prefix, suffix] = ['\n' + grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
-        const message = `${boards.length > 1 ? 'boards' : 'board'} added to ${ids.length > 1 ? 'items' : 'item'}`;
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        const message = `${grey(boards.join(', '))} ${boards.length > 1 ? 'boards' : 'board'} added to ${ids.length > 1 ? 'items' : 'item'}`;
         success({prefix, message, suffix});
     }
 
     successRemoveBoard(boards, ids) {
-        const [prefix, suffix] = ['\n' + grey(boards.join(', ')), grey(ids.join(', ')) + '\n'];
-        let message = `${boards.length > 1 ? 'boards' : 'board'} removed from ${ids.length > 1 ? 'items' : 'item'}`;
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `${grey(boards.join(', '))} ${boards.length > 1 ? 'boards' : 'board'} removed from ${ids.length > 1 ? 'items' : 'item'}`;
         success({prefix, message, suffix});
     }
 
     successAddTime(time, ids) {
-        const [prefix, suffix] = ['\n' + grey(time), grey(ids.join(', ')) + '\n'];
-        let message = `minutes added to ${ids.length > 1 ? 'items' : 'item'}`;
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `${grey(time)} minutes added to ${ids.length > 1 ? 'items' : 'item'}`;
         success({prefix, message, suffix});
     }
 
     successRemoveTime(time, ids) {
-        const [prefix, suffix] = ['\n' + grey(time), grey(ids.join(', ')) + '\n'];
-        let message = `minutes removed to ${ids.length > 1 ? 'items' : 'item'}`;
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `${grey(time)} minutes removed to ${ids.length > 1 ? 'items' : 'item'}`;
         success({prefix, message, suffix});
     }
 
