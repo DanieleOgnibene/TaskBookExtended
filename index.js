@@ -3,6 +3,10 @@
 const taskbook = require('./src/taskbook');
 
 const taskbookCLI = (input, flags) => {
+    if (flags.table) {
+        return taskbook.displayTable(input);
+    }
+
     if (flags.initDir) {
         return taskbook.saveNewTaskbookDirectory(input);
     }
@@ -123,7 +127,7 @@ const taskbookCLI = (input, flags) => {
         return taskbook.save();
     }
 
-    taskbook.displayByActiveDate();
+    taskbook.displayByDeadLine();
     return taskbook.displayStats();
 };
 

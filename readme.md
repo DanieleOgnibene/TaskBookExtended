@@ -320,9 +320,9 @@ In order to display all items in a timeline view, based on their creation date, 
 $ tb -i
 ```
 
-### Display Timeline by task active date
+### Display Timeline by task deadline
 
-In order to display all items in a timeline view, based on their active date, the `--ai` option can be used.
+In order to display all items in a timeline view, based on their deadline, the `--ai` option can be used.
 
 ```
 $ tb --ai

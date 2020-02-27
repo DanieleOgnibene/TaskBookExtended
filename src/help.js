@@ -5,7 +5,8 @@ module.exports = `
         $ tb [<options> ...]
     
         Options
-            none             Display timeline view by active date
+            none             Display timeline view by deadlines
+          --table            Display tasks in a grid
           --initDir          Init main directory (it is used to push data to GitHub)
           --save             Commit and push the changes in the default folder specified in taskbook.json (remember to init git)
           --boards           Display all boards
@@ -40,6 +41,7 @@ module.exports = `
     
         Examples
           $ tb
+          $ tb --table
           $ tb --initDir path
           $ tb --save
           $ tb --boards

@@ -67,6 +67,11 @@ class Taskbook {
         return ['b:true', 'b:false'].indexOf(x) > -1;
     }
 
+    _isDateOpt(x) {
+        const dateIdentifier = 'date:';
+        return x.startsWith(dateIdentifier);
+    }
+
     _getBoards() {
         const {_data} = this;
         const boards = ['My Board'];
@@ -90,12 +95,12 @@ class Taskbook {
         return dates;
     }
 
-    _getActiveDates(data = this._data) {
+    _getDeadlines(data = this._data) {
         const dates = [];
 
         Object.keys(data).forEach(id => {
-            if (dates.indexOf(data[id].activeDate) === -1) {
-                dates.push(data[id].activeDate);
+            if (dates.indexOf(data[id].deadline) === -1) {
+                dates.push(data[id].deadline);
             }
         });
 
@@ -113,7 +118,15 @@ class Taskbook {
 
     _getIsBug(desc) {
         const opt = desc.find(x => this._isBugOpt(x));
-        return opt ? opt[opt.length - 1] : false;
+        return !!opt ? opt.replace('b:', '').includes('true') : false;
+    }
+
+    _getDeadline(desc) {
+        const dateInput = desc
+            .filter(x => this._isDateOpt(x))
+            .map(target => target.replace('date:', ''))
+            .shift();
+        return dateInput ? this._convertDateStringInput(dateInput) : undefined;
     }
 
     _getOptions(input) {
@@ -127,9 +140,10 @@ class Taskbook {
         const id = this._generateID();
         const priority = this._getPriority(input);
         const isBug = this._getIsBug(input);
+        const deadline = this._getDeadline(input);
 
         input.forEach(x => {
-            if (!this._isPriorityOpt(x) && !this._isBugOpt(x)) {
+            if (!this._isPriorityOpt(x) && !this._isBugOpt(x) && !this._isDateOpt(x)) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
             }
         });
@@ -140,7 +154,7 @@ class Taskbook {
             boards.push('My board');
         }
 
-        return {boards, description, id, priority, isBug};
+        return {boards, description, id, priority, isBug, deadline};
     }
 
     _getStats() {
@@ -304,7 +318,6 @@ class Taskbook {
                 }
             });
         });
-
         return grouped;
     }
 
@@ -327,12 +340,12 @@ class Taskbook {
         return grouped;
     }
 
-    _groupByActiveDate(data = this._data, dates = this._getActiveDates()) {
+    _groupByDeadline(data = this._data, dates = this._getDeadlines()) {
         const grouped = {};
 
         Object.keys(data).forEach(id => {
             dates.forEach(date => {
-                if (data[id].activeDate === date) {
+                if (data[id].deadline === date) {
                     if (Array.isArray(grouped[date])) {
                         return grouped[date].push(data[id]);
                     }
@@ -400,6 +413,8 @@ class Taskbook {
                 return _data[id].isComplete ? checked.push(id) : unchecked.push(id);
             }
         });
+        checked.forEach(id => _data[id].completionDate = new Date().toDateString());
+        unchecked.forEach(id => _data[id].completionDate = undefined);
         this._save(_data);
         this._updateTimersByStartedAndPausedTasks([], checked);
         render.markComplete(checked);
@@ -423,9 +438,7 @@ class Taskbook {
 
     _updateTimersByStartedAndPausedTasks(started, paused) {
         const {_data} = this;
-        const todayDate = new Date().toDateString();
         started.forEach(id => {
-            _data[id].activeDate = todayDate;
             _data[id].inProgress = true;
             _data[id].isComplete = false;
             _data[id].inProgressActivationTime = new Date().getTime();
@@ -442,9 +455,32 @@ class Taskbook {
         this._save(_data);
     }
 
+    _getBoardsAndAttributes(terms) {
+        let [boards, attributes] = [[], []];
+        const storedBoards = this._getBoards();
+
+        terms.forEach(x => {
+            if (storedBoards.indexOf(`@${x}`) === -1) {
+                return x === 'myboard' ? boards.push('My Board') : attributes.push(x);
+            }
+
+            return boards.push(`@${x}`);
+        });
+
+        return [boards, attributes].map(x => this._removeDuplicates(x));
+    }
+
+    _getGroupedByBoardAndFiltered(terms) {
+        const boardsAndAttributes = this._getBoardsAndAttributes(terms);
+        const boards = boardsAndAttributes[0];
+        const attributes = boardsAndAttributes[1];
+        const data = this._filterByAttributes(attributes);
+        return this._groupByBoard(data, boards);
+    }
+
     createTask(desc) {
-        const {boards, description, id, priority, isBug} = this._getOptions(desc);
-        const task = new Task({id, description, boards, priority, isBug});
+        const {boards, description, id, priority, isBug, deadline} = this._getOptions(desc);
+        const task = new Task({id, description, boards, priority, isBug, deadline});
         const {_data} = this;
         _data[id] = task;
         this._save(_data);
@@ -477,8 +513,8 @@ class Taskbook {
         render.displayByDate(this._groupByDate());
     }
 
-    displayByActiveDate() {
-        render.displayByDate(this._groupByActiveDate());
+    displayByDeadLine() {
+        render.displayByDate(this._groupByDeadline());
     }
 
     displayStats() {
@@ -529,21 +565,115 @@ class Taskbook {
     }
 
     listByAttributes(terms) {
-        let [boards, attributes] = [[], []];
-        const storedBoards = this._getBoards();
+        render.displayByBoard(this._getGroupedByBoardAndFiltered(terms));
+    }
 
-        terms.forEach(x => {
-            if (storedBoards.indexOf(`@${x}`) === -1) {
-                return x === 'myboard' ? boards.push('My Board') : attributes.push(x);
+    displayTable(terms) {
+        const groupedByBoardAndFiltered = this._getGroupedByBoardAndFiltered(terms);
+        let resultItems = [];
+        Object.keys(groupedByBoardAndFiltered).forEach(board => resultItems.push(...groupedByBoardAndFiltered[board]));
+        resultItems = Array.from(new Set(resultItems));
+        resultItems = resultItems.filter(item => item._isTask).map(item => {
+            const newTableItem = {
+                'ID': item._id,
+                'Boards': item.boards,
+                'Description': item.description + (item.isBug ? '(BUG) ' : '')
+            };
+            if (!!item.cumulativeTimeTaken) {
+                newTableItem['Time'] = render._getDurationFormatted(item.cumulativeTimeTaken)
             }
-
-            return boards.push(`@${x}`);
+            if (!!item.deadline) {
+                newTableItem['Deadline'] = item.deadline;
+            }
+            if (!!item.completionDate) {
+                newTableItem['Completed'] = item.completionDate;
+            }
+            return newTableItem;
         });
+        this._sortDataByTerms(terms, resultItems);
+        console.log('\n');
+        console.table(resultItems);
+        console.log('\n');
+    }
 
-        [boards, attributes] = [boards, attributes].map(x => this._removeDuplicates(x));
+    _sortDataByTerms(terms, data) {
+        const sortIdentifier = 'sort:';
+        const invertSortIdentifier = 'isort:';
+        const sortCommand = terms.find(x => x.startsWith(sortIdentifier));
+        const invertSortCommand = terms.find(x => x.startsWith(invertSortIdentifier));
+        let sortColumn = '';
+        let sortModifier;
+        if (!!sortCommand) {
+            sortColumn = sortCommand.replace(sortIdentifier, '');
+            sortModifier = 1;
+        }
+        if (!!invertSortCommand) {
+            sortColumn = invertSortCommand.replace(invertSortIdentifier, '');
+            sortModifier = 0;
+        }
+        if (!sortColumn) {
+            return;
+        }
+        switch (sortColumn) {
+            case "ID":
+                data.sort((a, b) => sortModifier === 1 ? a[sortColumn] - b[sortColumn] : b[sortColumn] - a[sortColumn]);
+                break;
+            case "Description":
+                data.sort((a, b) => sortModifier === 1 ? a[sortColumn].localeCompare(b[sortColumn]) : b[sortColumn].localeCompare(a[sortColumn]));
+                break;
+            case "Boards":
+                data.sort((a, b) => sortModifier === 1 ? this._compareArrayLengths(a[sortColumn], b[sortColumn]) : this._compareArrayLengths(b[sortColumn], a[sortColumn]));
+                break;
+            case "Deadline":
+            case "Completed":
+                data.sort((dateA, dateB) => sortModifier === 1 ? this._compareDates(dateA[sortColumn], dateB[sortColumn]) : this._compareDates(dateB[sortColumn], dateA[sortColumn]));
+                break;
+            case "Time":
+                data.sort((timeA, timeB) => sortModifier === 1 ? this._compareDurations(timeA[sortColumn], timeB[sortColumn]) : this._compareDurations(timeB[sortColumn], timeA[sortColumn]));
+                break;
+        }
+    }
 
-        const data = this._filterByAttributes(attributes);
-        render.displayByBoard(this._groupByBoard(data, boards));
+    _compareDurations(durationA, durationB) {
+        if (!durationA && !durationB) {
+            return 0;
+        }
+        if (!durationA) {
+            return 1;
+        }
+        if (!durationB) {
+            return -1;
+        }
+        const splitDurationA = durationA.split(':');
+        const splitDurationB = durationB.split(':');
+        const lengthA = splitDurationA.length;
+        const lengthB = splitDurationB.length;
+        if (lengthA !== lengthB) {
+            return lengthA - lengthB;
+        }
+        const hoursA = +splitDurationA[0];
+        const hoursB = +splitDurationB[0];
+        const minutesA = +splitDurationA[1];
+        const minutesB = +splitDurationA[1];
+        const secondsA = +splitDurationA[2];
+        const secondsB = +splitDurationB[2];
+        if (hoursA !== hoursB) {
+            return hoursA - hoursB;
+        }
+        if (minutesA !== minutesB) {
+            return minutesA - minutesB;
+        }
+        if (secondsA !== secondsB) {
+            return secondsA - secondsB;
+        }
+    }
+
+    _compareDates(dateA, dateB) {
+        return new Date(dateA || 0).getTime() - new Date(dateB || 0).getTime();
+    }
+
+    _compareArrayLengths(arrayA, arrayB) {
+        return arrayA.length - arrayB.length;
     }
 
     moveItemsToDate(input) {
@@ -561,7 +691,7 @@ class Taskbook {
         const date = this._convertDateStringInput(dateInputs.shift());
         const {_data} = this;
         ids.forEach(id => {
-            _data[id].activeDate = date;
+            _data[id].deadline = date;
         });
         this._save(_data);
         render.successMoveToDate(date, ids);
@@ -658,7 +788,7 @@ class Taskbook {
         const currentDate = new Date();
         const {_data} = this;
         ids.forEach(id => {
-            _data[id].activeDate = currentDate.toDateString();
+            _data[id].deadline = currentDate.toDateString();
         });
         this._save(_data);
         render.successMoveToToday(ids);
@@ -668,7 +798,7 @@ class Taskbook {
         ids = this._validateIDs(ids);
         const {_data} = this;
         ids.forEach(id => {
-            _data[id].activeDate = _data[id]._date;
+            _data[id].deadline = _data[id]._date;
         });
         this._save(_data);
         render.successResetDate(ids);
