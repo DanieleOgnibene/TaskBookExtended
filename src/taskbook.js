@@ -648,24 +648,40 @@ class Taskbook {
         if (!sortColumn) {
             return;
         }
+        sortColumn = sortColumn.toLowerCase();
         switch (sortColumn) {
-            case "ID":
-                data.sort((a, b) => sortModifier === 1 ? a[sortColumn] - b[sortColumn] : b[sortColumn] - a[sortColumn]);
+            case "id": {
+                const key = 'ID';
+                data.sort((a, b) => sortModifier === 1 ? a[key] - b[key] : b[key] - a[key]);
                 break;
-            case "Description":
-                data.sort((a, b) => sortModifier === 1 ? a[sortColumn].localeCompare(b[sortColumn]) : b[sortColumn].localeCompare(a[sortColumn]));
+            }
+            case "description": {
+                const key = 'Description';
+                data.sort((a, b) => sortModifier === 1 ? a[key].localeCompare(b[key]) : b[key].localeCompare(a[key]));
                 break;
-            case "Boards":
-                data.sort((a, b) => sortModifier === 1 ? this._compareArrayLengths(a[sortColumn], b[sortColumn]) : this._compareArrayLengths(b[sortColumn], a[sortColumn]));
+            }
+            case "boards": {
+                const key = 'Boards';
+                data.sort((a, b) => sortModifier === 1 ? this._compareArrayLengths(a[key], b[key]) : this._compareArrayLengths(b[key], a[key]));
                 break;
-            case "Deadline":
-            case "Completed":
-                data.sort((dateA, dateB) => sortModifier === 1 ? this._compareDates(dateA[sortColumn], dateB[sortColumn]) : this._compareDates(dateB[sortColumn], dateA[sortColumn]));
+            }
+            case "deadline":
+                data.sort(this._dataSortFnByDate(data, 'Deadline'), sortModifier);
                 break;
-            case "Time":
-                data.sort((timeA, timeB) => sortModifier === 1 ? this._compareDurations(timeA[sortColumn], timeB[sortColumn]) : this._compareDurations(timeB[sortColumn], timeA[sortColumn]));
+            case "completed":
+                data.sort(this._dataSortFnByDate(data, 'Completed'), sortModifier);
                 break;
+            case "time": {
+                const key = 'Time';
+                data.sort((timeA, timeB) => sortModifier === 1 ? this._compareDurations(timeA[key], timeB[key]) : this._compareDurations(timeB[key], timeA[key]));
+                break;
+            }
         }
+    }
+
+    _dataSortFnByDate(data, key, sortModifier) {
+        return (dateA, dateB) =>
+            sortModifier === 1 ? this._compareDates(dateA[key], dateB[key]) : this._compareDates(dateB[key], dateA[key]);
     }
 
     _compareDurations(durationA, durationB) {
