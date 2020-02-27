@@ -470,26 +470,22 @@ class Taskbook {
 
     _getBoardsAndAttributes(terms) {
         let [boards, attributes, linkedBoards] = [[], [], []];
-        const storedBoards = this._getBoards();
-
         terms.forEach(x => {
-            if (x.includes('-@')) {
-                const [firstBoard, secondBoard] = x.split('-');
-                if (firstBoard.startsWith('@')) {
-                    linkedBoards.push(firstBoard, secondBoard);
-                }
+            const splitLinkedBoards = x.split('-');
+            if (splitLinkedBoards.every(linkedBoard => this._isAValidBoard(linkedBoard))) {
+                return splitLinkedBoards.length > 1 ? linkedBoards.push(...splitLinkedBoards) : boards.push(x);
             }
-            if (storedBoards.indexOf(x) !== -1) {
-                return boards.push(x);
-            }
-            if (storedBoards.indexOf(`@${x}`) === -1) {
+            if (this._isAValidBoard(`@${x}`)) {
                 return x === 'myboard' ? boards.push('My Board') : attributes.push(x);
             }
 
             return boards.push(`@${x}`);
         });
-
         return [boards, attributes, linkedBoards].map(x => this._removeDuplicates(x));
+    }
+
+    _isAValidBoard(board) {
+        return this._getBoards().indexOf(board) !== -1;
     }
 
     _getGroupedByBoardAndFiltered(terms) {
@@ -498,14 +494,21 @@ class Taskbook {
         const attributes = boardsAndAttributes[1];
         const linkedBoards = boardsAndAttributes[2];
         const data = this._filterByAttributes(attributes);
-        return this._groupByBoard(this._filterDataByLinkedBoards(data, linkedBoards), boards);
+        const boardsToGroup = [...boards];
+        boardsToGroup.push(...linkedBoards);
+        return this._groupByBoard(
+            this._filterDataByLinkedBoards(data, linkedBoards, boards),
+            Array.from(new Set(boardsToGroup))
+        );
     }
 
-    _filterDataByLinkedBoards(data, linkedBoards) {
+    _filterDataByLinkedBoards(data, linkedBoards, boards) {
         const idsFiltered = Object.keys(data)
-            .filter(
-                id => linkedBoards.every(linkedBoard => data[id].boards.some(board => board === linkedBoard))
-            );
+            .filter(id => {
+                const itemBoards = data[id].boards;
+                return linkedBoards.every(linkedBoard => itemBoards.includes(linkedBoard)) ||
+                    itemBoards.some(itemBoard => boards.includes(itemBoard));
+            });
         return idsFiltered.map(id => data[id]);
     }
 
