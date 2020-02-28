@@ -315,10 +315,13 @@ class Taskbook {
     }
 
     _groupByBoard(data = this._data, activeBoards = this._getBoards(data)) {
+        if (activeBoards.length === 0) {
+            activeBoards = this._getBoards(data);
+        }
         const grouped = {};
         activeBoards.forEach(activeBoard => {
-           grouped[activeBoard] = Object.keys(data)
-               .filter(id => data[id].boards.includes(activeBoard)).map(id => data[id]);
+            grouped[activeBoard] = Object.keys(data)
+                .filter(id => data[id].boards.includes(activeBoard)).map(id => data[id]);
         });
         return grouped;
     }
@@ -642,6 +645,10 @@ class Taskbook {
     }
 
     _displayTableWithStats(resultTableItems) {
+        if (resultTableItems.length === 0) {
+            render.noDataToDisplay();
+            process.exit(1);
+        }
         render.displayByTable(resultTableItems);
         this.displayStats(resultTableItems.map(resultItem => this._data[resultItem.ID] || this._archive[resultItem.ID]));
     }

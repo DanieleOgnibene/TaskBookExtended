@@ -315,6 +315,12 @@ class Render {
         error({prefix, message});
     }
 
+    noDataToDisplay() {
+        const prefix = '\n';
+        const message = 'No data to display, try to use less filters!' + '\n';
+        error({prefix, message});
+    }
+
     markComplete(ids) {
         if (ids.length === 0) {
             return;
