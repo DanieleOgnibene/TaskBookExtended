@@ -6,7 +6,7 @@ const config = require('./config');
 signale.config({displayLabel: false});
 
 const {await: wait, error, log, note, pending, success} = signale;
-const {blue, green, grey, magenta, red, underline, yellow} = chalk;
+const {blueBright: blue, greenBright: green, grey, magentaBright: magenta, redBright: red, underline, yellowBright: yellow} = chalk;
 
 const priorities = {2: 'yellow', 3: 'red'};
 
