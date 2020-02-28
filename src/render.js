@@ -309,6 +309,12 @@ class Render {
         error({prefix, message});
     }
 
+    invalidDataOption() {
+        const prefix = '\n';
+        const message = 'Data option can only be "current", "archive" or "all"' + '\n';
+        error({prefix, message});
+    }
+
     markComplete(ids) {
         if (ids.length === 0) {
             return;

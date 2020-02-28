@@ -35,10 +35,16 @@ class Taskbook {
         return [...new Set(this._arrayify(x))];
     }
 
-    _generateID(data = this._data) {
-        const ids = Object.keys(data).map(id => parseInt(id, 10));
-        const max = (ids.length === 0) ? 0 : Math.max(...ids);
+    _generateID() {
+        const ids = this._getListOfIdsByData(this._data);
+        const max = (ids.length === 0) ?
+            Math.max(...this._getListOfIdsByData(this._archive)) :
+            Math.max(...ids);
         return max + 1;
+    }
+
+    _getListOfIdsByData(data) {
+        return Object.keys(data).map(id => parseInt(id, 10));
     }
 
     _validateIDs(inputIDs, existingIDs = this._getIDs()) {
@@ -72,12 +78,11 @@ class Taskbook {
         return x.startsWith(dateIdentifier);
     }
 
-    _getBoards() {
-        const {_data} = this;
+    _getBoards(data = {...this._data, ...this._archive}) {
         const boards = ['My Board'];
 
-        Object.keys(_data).forEach(id => {
-            boards.push(..._data[id].boards.filter(x => boards.indexOf(x) === -1));
+        Object.keys(data).forEach(id => {
+            boards.push(...data[id].boards.filter(x => boards.indexOf(x) === -1));
         });
 
         return boards;
@@ -131,17 +136,14 @@ class Taskbook {
 
     _getOptions(input) {
         const [boards, desc] = [[], []];
-
         if (input.length === 0) {
             render.missingDesc();
             process.exit(1);
         }
-
         const id = this._generateID();
         const priority = this._getPriority(input);
         const isBug = this._getIsBug(input);
         const deadline = this._getDeadline(input);
-
         input.forEach(x => {
             if (!this._isPriorityOpt(x) && !this._isBugOpt(x) && !this._isDateOpt(x)) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
@@ -252,7 +254,6 @@ class Taskbook {
         if (Object.keys(data).length === 0) {
             return data;
         }
-
         attr.forEach(x => {
             switch (x) {
                 case 'star':
@@ -313,23 +314,11 @@ class Taskbook {
             .map(id => data[id]);
     }
 
-    _groupByBoard(data = this._data, boards = this._getBoards()) {
+    _groupByBoard(data = this._data, activeBoards = this._getBoards(data)) {
         const grouped = {};
-
-        if (boards.length === 0) {
-            boards = this._getBoards();
-        }
-
-        Object.keys(data).forEach(id => {
-            const dataBoards = data[id].boards;
-            boards.forEach(board => {
-                if (dataBoards.includes(board)) {
-                    if (Array.isArray(grouped[board])) {
-                        return grouped[board].push(data[id]);
-                    }
-                    grouped[board] = [data[id]];
-                }
-            });
+        activeBoards.forEach(activeBoard => {
+           grouped[activeBoard] = Object.keys(data)
+               .filter(id => data[id].boards.includes(activeBoard)).map(id => data[id]);
         });
         return grouped;
     }
@@ -374,21 +363,13 @@ class Taskbook {
 
     _saveItemToArchive(item) {
         const {_archive} = this;
-        const archiveID = this._generateID(_archive);
-
-        item._id = archiveID;
-        _archive[archiveID] = item;
-
+        _archive[item._id] = item;
         this._saveArchive(_archive);
     }
 
     _saveItemToStorage(item) {
         const {_data} = this;
-        const restoreID = this._generateID();
-
-        item._id = restoreID;
-        _data[restoreID] = item;
-
+        _data[item._id] = item;
         this._save(_data);
     }
 
@@ -475,7 +456,7 @@ class Taskbook {
             if (splitLinkedBoards.every(linkedBoard => this._isAValidBoard(linkedBoard))) {
                 return splitLinkedBoards.length > 1 ? linkedBoards.push(...splitLinkedBoards) : boards.push(x);
             }
-            if (this._isAValidBoard(`@${x}`)) {
+            if (!this._isAValidBoard(`@${x}`)) {
                 return x === 'myboard' ? boards.push('My Board') : attributes.push(x);
             }
 
@@ -493,20 +474,52 @@ class Taskbook {
         const boards = boardsAndAttributes[0];
         const attributes = boardsAndAttributes[1];
         const linkedBoards = boardsAndAttributes[2];
-        const data = this._filterByAttributes(attributes);
+        const data = this._filterByAttributes(
+            attributes,
+            this._getAskedDataByTerms(terms)
+        );
         const boardsToGroup = [...boards];
         boardsToGroup.push(...linkedBoards);
         return this._groupByBoard(
-            this._filterDataByLinkedBoards(data, linkedBoards, boards),
+            this._filterDataByLinkedBoardsAndBoards(data, linkedBoards, boards),
             Array.from(new Set(boardsToGroup))
         );
     }
 
-    _filterDataByLinkedBoards(data, linkedBoards, boards) {
+    _getAskedDataByTerms(terms) {
+        const dataIdentifier = 'data:';
+        const dataOption = terms.find(term => term.includes(dataIdentifier));
+        if (!!dataOption) {
+            let dataName = dataOption.replace(dataIdentifier, '');
+            dataName.toLowerCase();
+            switch (dataName) {
+                case 'archive':
+                    return this._archive;
+                case 'all':
+                    return {
+                        ...this._data,
+                        ...this._archive
+                    };
+                case 'current':
+                    return this._data;
+                default:
+                    render.invalidDataOption();
+                    process.exit(1);
+                    break;
+            }
+        }
+        return this._data;
+    }
+
+    _filterDataByLinkedBoardsAndBoards(data, linkedBoards, boards) {
+        if (linkedBoards.length === 0 && boards.length === 0) {
+            return data;
+        }
         const idsFiltered = Object.keys(data)
             .filter(id => {
                 const itemBoards = data[id].boards;
-                return linkedBoards.every(linkedBoard => itemBoards.includes(linkedBoard)) ||
+                return linkedBoards.length > 0 &&
+                    linkedBoards.every(linkedBoard => itemBoards.includes(linkedBoard)) ||
                     itemBoards.some(itemBoard => boards.includes(itemBoard));
             });
         return idsFiltered.map(id => data[id]);
@@ -630,7 +643,7 @@ class Taskbook {
 
     _displayTableWithStats(resultTableItems) {
         render.displayByTable(resultTableItems);
-        this.displayStats(resultTableItems.map(resultItem => this._data[resultItem.ID]));
+        this.displayStats(resultTableItems.map(resultItem => this._data[resultItem.ID] || this._archive[resultItem.ID]));
     }
 
     _sortDataByTerms(terms, data) {
