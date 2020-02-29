@@ -35,18 +35,6 @@ class Taskbook {
         return [...new Set(this._arrayify(x))];
     }
 
-    _generateID() {
-        const ids = this._getListOfIdsByData(this._data);
-        const max = (ids.length === 0) ?
-            Math.max(...this._getListOfIdsByData(this._archive)) :
-            Math.max(...ids);
-        return max + 1;
-    }
-
-    _getListOfIdsByData(data) {
-        return Object.keys(data).map(id => parseInt(id, 10));
-    }
-
     _validateIDs(inputIDs, existingIDs = this._getIDs()) {
         if (inputIDs.length === 0) {
             render.missingID();
@@ -56,7 +44,7 @@ class Taskbook {
         inputIDs = this._removeDuplicates(inputIDs);
 
         inputIDs.forEach(id => {
-            if (existingIDs.indexOf(Number(id)) === -1) {
+            if (existingIDs.indexOf(id) === -1) {
                 render.invalidID(id);
                 process.exit(1);
             }
@@ -113,7 +101,7 @@ class Taskbook {
     }
 
     _getIDs(data = this._data) {
-        return Object.keys(data).map(id => parseInt(id, 10));
+        return Object.keys(data);
     }
 
     _getPriority(desc) {
@@ -140,7 +128,7 @@ class Taskbook {
             render.missingDesc();
             process.exit(1);
         }
-        const id = this._generateID();
+        const id = this._generateID(this._data);
         const priority = this._getPriority(input);
         const isBug = this._getIsBug(input);
         const deadline = this._getDeadline(input);
@@ -351,10 +339,10 @@ class Taskbook {
         Object.keys(data).forEach(id => {
             dates.forEach(date => {
                 if (data[id].deadline === date) {
+                    date = !!date ? date : 'No deadline';
                     if (Array.isArray(grouped[date])) {
                         return grouped[date].push(data[id]);
                     }
-
                     grouped[date] = [data[id]];
                     return grouped[date];
                 }
@@ -366,14 +354,35 @@ class Taskbook {
 
     _saveItemToArchive(item) {
         const {_archive} = this;
+        item._id = 'a-' + this._generateID(_archive);
         _archive[item._id] = item;
         this._saveArchive(_archive);
     }
 
     _saveItemToStorage(item) {
         const {_data} = this;
+        item._id = this._generateID(_data);
         _data[item._id] = item;
         this._save(_data);
+    }
+
+    _generateID(data) {
+        const currentIds = Object.keys(data);
+        return this._getFirstNewFreeId(currentIds);
+    }
+
+    _getFirstNewFreeId(currentIds) {
+        const archiveIdIdentifier = 'a-';
+        const normalizedCurrentIds = currentIds
+            .map(
+                currentId => (currentId + '').includes(archiveIdIdentifier) ?
+                    +currentId.replace(archiveIdIdentifier, '') :
+                    +currentId
+            );
+        const maxId = Math.max(...normalizedCurrentIds);
+        const idPool = Array.from(new Array(maxId).keys()).map(key => key + 1);
+        const firstFreeId = idPool.find(id => !normalizedCurrentIds.includes(id));
+        return (firstFreeId || maxId + 1).toString();
     }
 
     saveNewTaskbookDirectory(inputs) {
@@ -531,6 +540,7 @@ class Taskbook {
     createTask(desc) {
         const {boards, description, id, priority, isBug, deadline} = this._getOptions(desc);
         const task = new Task({id, description, boards, priority, isBug, deadline});
+        task.boards.sort((a, b) => a.localeCompare(b));
         const {_data} = this;
         _data[id] = task;
         this._save(_data);
@@ -626,11 +636,13 @@ class Taskbook {
         const resultTableItems = uniqueTaskItemsToBeDisplayed.map(item => {
             const newTableItem = {
                 'ID': item._id,
-                'Boards': item.boards,
-                'Description': item.description + (item.isBug ? '(BUG) ' : '')
+                'Boards': item.boards.join('·'),
+                'Description': (item.isBug ? '(BUG) ' : '') + item.description
             };
             if (!!item.cumulativeTimeTaken) {
-                newTableItem['Time'] = render._getDurationFormatted(item.cumulativeTimeTaken)
+                const currentTimer = item.inProgressActivationTime ? new Date().getTime() - item.inProgressActivationTime : 0;
+                const time = render._getDurationFormatted(item.cumulativeTimeTaken + currentTimer);
+                newTableItem['Time'] = currentTimer ? `·${time}·` : time
             }
             if (!!item.deadline) {
                 newTableItem['Deadline'] = item.deadline;
@@ -787,6 +799,7 @@ class Taskbook {
             _data[id].boards.push(
                 ...boards.filter(board => _data[id].boards.every(itemBoard => itemBoard !== board))
             );
+            _data[id].boards.sort((a, b) => a.localeCompare(b));
         });
         this._save(_data);
         render.successAddBoard(boards, ids);
@@ -810,6 +823,20 @@ class Taskbook {
         });
         this._save(_data);
         render.successRemoveBoard(boards, ids);
+    }
+
+    removeDeadline(targets) {
+        const ids = this._validateIDs(targets);
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].deadline = undefined;
+        });
+        this._save(_data);
+        render.successRemoveDeadline(ids);
     }
 
     _convertDateStringInput(dateString) {

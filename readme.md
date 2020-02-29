@@ -84,7 +84,8 @@ Usage
         $ tb [<options> ...]
     
         Options
-            none             Display timeline view by active date
+            none             Display timeline view by deadlines
+          --table            Display tasks in a grid
           --initDir          Init main directory (it is used to push data to GitHub)
           --save             Commit and push the changes in the default folder specified in taskbook.json (remember to init git)
           --boards           Display all boards
@@ -107,6 +108,7 @@ Usage
           --note, -n         Create note
           --priority, -p     Update priority of tasks (@ids)
           --removeBoard      Remove a board from an item
+          --removeDeadline   Remove the deadline from tasks
           --resetDate        Move items with ids to their creation date
           --clearTimer       Clear timer from target ids
           --clearTime        Clear total time from target ids
@@ -119,6 +121,7 @@ Usage
     
         Examples
           $ tb
+          $ tb --table
           $ tb --initDir path
           $ tb --save
           $ tb --boards
@@ -140,6 +143,7 @@ Usage
           $ tb --note @coding Mergesort worse-case O(nlogn)
           $ tb --priority @3 2
           $ tb --removeBoard 3 @boardName
+          $ tb --removeDeadline 3 2
           $ tb --resetDate 3 2
           $ tb --restore 4
           $ tb --clearTimer 3 5 
@@ -310,6 +314,14 @@ To remove multiple boards to target ids, the `--removeBoard` option can be used.
 
 ```
 $ tb --removeBoard 1 2 @BoardName @BoardName2
+```
+
+### Remove Deadline
+
+To remove deadlines from target ids, the `--removeDeadline` option can be used.
+
+```
+$ tb --removeDeadline 1 2
 ```
 
 ### Display Timeline

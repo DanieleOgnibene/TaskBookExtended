@@ -128,6 +128,10 @@ const cli = meow(help, {
       type: 'boolean',
       alias: 'removeBoard'
     },
+    removeDeadline: {
+      type: 'boolean',
+      alias: 'removeDeadline'
+    },
     clear: {
       type: 'boolean'
     },

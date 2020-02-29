@@ -505,6 +505,12 @@ class Render {
         success({prefix, message, suffix});
     }
 
+    successRemoveDeadline(ids) {
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `Deadline removed from ${ids.length > 1 ? 'items' : 'item'}`;
+        success({prefix, message, suffix});
+    }
+
     successAddTime(time, ids) {
         const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         let message = `${grey(time)} minutes added to ${ids.length > 1 ? 'items' : 'item'}`;

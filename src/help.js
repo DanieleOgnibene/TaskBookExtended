@@ -29,6 +29,7 @@ module.exports = `
           --note, -n         Create note
           --priority, -p     Update priority of tasks (@ids)
           --removeBoard      Remove a board from an item
+          --removeDeadline   Remove the deadline from tasks
           --resetDate        Move items with ids to their creation date
           --clearTimer       Clear timer from target ids
           --clearTime        Clear total time from target ids
@@ -63,6 +64,7 @@ module.exports = `
           $ tb --note @coding Mergesort worse-case O(nlogn)
           $ tb --priority @3 2
           $ tb --removeBoard 3 @boardName
+          $ tb --removeDeadline 3 2
           $ tb --resetDate 3 2
           $ tb --restore 4
           $ tb --clearTimer 3 5 

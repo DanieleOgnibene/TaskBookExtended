@@ -91,6 +91,10 @@ const taskbookCLI = (input, flags) => {
         return taskbook.removeBoard(input);
     }
 
+    if (flags.removeDeadline) {
+        return taskbook.removeDeadline(input);
+    }
+
     if (flags.moveToToday) {
         return taskbook.moveToToday(input);
     }
