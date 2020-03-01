@@ -465,7 +465,9 @@ class Taskbook {
         this._updateTimersByStartedAndPausedTasks([], checked);
         render.markComplete(checked);
         render.markIncomplete(unchecked);
-        render.notTasks(notTasks);
+        if (notTasks.length > 0) {
+            render.notTasks(notTasks);
+        }
     }
 
     beginTasks(ids) {
@@ -483,7 +485,9 @@ class Taskbook {
         this._updateTimersByStartedAndPausedTasks(started, paused);
         render.markStarted(started);
         render.markPaused(paused);
-        render.notTasks(notTasks);
+        if (notTasks.length > 0) {
+            render.notTasks(notTasks);
+        }
     }
 
     _updateTimersByStartedAndPausedTasks(started, paused) {
