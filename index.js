@@ -31,6 +31,10 @@ const taskbookCLI = (input, flags) => {
         return taskbook.deleteItems(input);
     }
 
+    if (flags.hardDelete) {
+        return taskbook.hardDeleteItems(input);
+    }
+
     if (flags.check) {
         return taskbook.checkTasks(input);
     }
@@ -138,7 +142,7 @@ const taskbookCLI = (input, flags) => {
     }
 
     if (flags.save) {
-        return taskbook.save();
+        return taskbook.pushOnline();
     }
 
     taskbook.displayByDeadLine();

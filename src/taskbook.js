@@ -5,6 +5,7 @@ const Task = require('./task');
 const Note = require('./note');
 const Storage = require('./storage');
 const render = require('./render');
+const chalk = require('chalk');
 
 class Taskbook {
     constructor() {
@@ -61,18 +62,16 @@ class Taskbook {
         return ['b:true', 'b:false'].indexOf(x) > -1;
     }
 
-    _isDateOpt(x) {
-        const dateIdentifier = 'date:';
+    _isDeadlineOpt(x) {
+        const dateIdentifier = 'deadline:';
         return x.startsWith(dateIdentifier);
     }
 
     _getBoards(data = {...this._data, ...this._archive}) {
         const boards = ['My Board'];
-
         Object.keys(data).forEach(id => {
             boards.push(...data[id].boards.filter(x => boards.indexOf(x) === -1));
         });
-
         return boards;
     }
 
@@ -116,8 +115,8 @@ class Taskbook {
 
     _getDeadline(desc) {
         const dateInput = desc
-            .filter(x => this._isDateOpt(x))
-            .map(target => target.replace('date:', ''))
+            .filter(x => this._isDeadlineOpt(x))
+            .map(target => target.replace('deadline:', ''))
             .shift();
         return dateInput ? this._convertDateStringInput(dateInput) : undefined;
     }
@@ -146,7 +145,7 @@ class Taskbook {
         const deadline = this._getDeadline(input);
         const link = this._getLink(input);
         input.forEach(x => {
-            if (!this._isPriorityOpt(x) && !this._isBugOpt(x) && !this._isDateOpt(x)) {
+            if (!this._isPriorityOpt(x) && !this._isBugOpt(x) && !this._isDeadlineOpt(x)) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
             }
         });
@@ -224,6 +223,7 @@ class Taskbook {
     _filterComplete(data) {
         Object.keys(data).forEach(id => {
             if (!data[id]._isTask || !data[id].isComplete) {
+                delete data[id];
                 delete data[id];
             }
         });
@@ -451,11 +451,13 @@ class Taskbook {
         ids = this._validateIDs(ids);
         const {_data} = this;
         const [checked, unchecked] = [[], []];
+        const notTasks = [];
         ids.forEach(id => {
             if (_data[id]._isTask) {
                 _data[id].isComplete = !_data[id].isComplete;
                 return _data[id].isComplete ? checked.push(id) : unchecked.push(id);
             }
+            notTasks.push(id);
         });
         checked.forEach(id => _data[id].completionDate = new Date().toDateString());
         unchecked.forEach(id => _data[id].completionDate = undefined);
@@ -463,21 +465,25 @@ class Taskbook {
         this._updateTimersByStartedAndPausedTasks([], checked);
         render.markComplete(checked);
         render.markIncomplete(unchecked);
+        render.notTasks(notTasks);
     }
 
     beginTasks(ids) {
         ids = this._validateIDs(ids);
         const {_data} = this;
         const [started, paused] = [[], []];
+        const notTasks = [];
         ids.forEach(id => {
             if (_data[id]._isTask) {
                 _data[id].isComplete = false;
                 return _data[id].inProgress ? paused.push(id) : started.push(id);
             }
+            notTasks.push(id);
         });
         this._updateTimersByStartedAndPausedTasks(started, paused);
         render.markStarted(started);
         render.markPaused(paused);
+        render.notTasks(notTasks);
     }
 
     _updateTimersByStartedAndPausedTasks(started, paused) {
@@ -589,16 +595,37 @@ class Taskbook {
     }
 
     deleteItems(ids) {
-        ids = this._validateIDs(ids);
         const {_data} = this;
-
+        ids = this._validateIDs(ids);
         ids.forEach(id => {
             this._saveItemToArchive(_data[id]);
             delete _data[id];
         });
-
         this._save(_data);
         render.successDelete(ids);
+    }
+
+    hardDeleteItems(ids) {
+        const {_data} = this;
+        const {_archive} = this;
+        ids = this._validateIDs(ids, this._getIDs({..._data, ..._archive}));
+        render.askConfirmation(
+            render.hardDeleteConfirmationMessage(ids),
+            (err, result) => {
+                const confirmation = result.confirm.toLowerCase();
+                if (confirmation !== 'y' && confirmation !== 'yes') {
+                    return;
+                }
+                ids.forEach(id => {
+                    !!_data[id] ?
+                        delete _data[id] :
+                        delete _archive[id];
+                });
+                this._save(_data);
+                this._saveArchive(_archive);
+                render.successHardDelete(ids);
+            }
+        );
     }
 
     displayArchive(input) {
@@ -1139,7 +1166,7 @@ class Taskbook {
         this.deleteItems(ids);
     }
 
-    save() {
+    pushOnline() {
         this._storage.pushOnline();
     }
 }

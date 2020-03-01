@@ -44,6 +44,10 @@ const cli = meow(help, {
             type: 'boolean',
             alias: 'd'
         },
+        hardDelete: {
+            type: 'boolean',
+            alias: 'D'
+        },
         check: {
             type: 'boolean',
             alias: 'c'

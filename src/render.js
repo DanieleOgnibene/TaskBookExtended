@@ -2,6 +2,7 @@
 const chalk = require('chalk');
 const signale = require('signale');
 const config = require('./config');
+const prompt = require('prompt');
 
 signale.config({displayLabel: false});
 
@@ -26,6 +27,10 @@ class Render {
     _isBoardComplete(items) {
         const {tasks, complete, notes} = this._getItemStats(items);
         return tasks === complete && notes === 0;
+    }
+
+    _isBoardEmpty(items) {
+        return items.length === 0;
     }
 
     _getAge(birthday) {
@@ -186,7 +191,10 @@ class Render {
 
     displayByBoard(data) {
         Object.keys(data).forEach(board => {
-            if (this._isBoardComplete(data[board]) && !this._configuration.displayCompleteTasks) {
+            const boardItems = data[board];
+            if (this._isBoardComplete(boardItems) &&
+                !this._configuration.displayCompleteTasks ||
+                this._isBoardEmpty(boardItems)) {
                 return;
             }
 
@@ -223,6 +231,29 @@ class Render {
                 (firstDate, secondDate) =>
                     new Date(firstDate).getTime() - new Date(secondDate).getTime()
             );
+    }
+
+    hardDeleteConfirmationMessage(ids) {
+        return `${redBright(`\n Permanently ${underline('remove')}`)} ${grey(ids.join(', '))} ?`;
+    }
+
+    askConfirmation(message, callbackFn) {
+        this.askPrompt(message, ' (Yes/[No])', /^(yes|no|y|n)$/gi, callbackFn);
+    }
+
+    askPrompt(message, description, pattern, callbackFn) {
+        prompt.start();
+        prompt.message = message;
+        prompt.delimiter = '';
+        prompt.colors = false;
+        prompt.get({
+            properties: {
+                confirm: {
+                    pattern: pattern,
+                    description: description
+                }
+            }
+        }, callbackFn);
     }
 
     displayStats({percent, complete, inProgress, pending, notes, totalTime}) {
@@ -323,6 +354,13 @@ class Render {
     noDataToDisplay() {
         const prefix = '\n';
         const message = 'No data to display, try to use less filters!' + '\n';
+        error({prefix, message});
+    }
+
+    notTasks(ids) {
+        const prefix = '\n';
+        const idsString = grey(ids.join(', '));
+        const message = `${ids.length > 1 ? `Items ${idsString} are not tasks` : `item ${idsString} is not a task`}\n`;
         error({prefix, message});
     }
 
@@ -463,6 +501,12 @@ class Render {
     successDelete(ids) {
         const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         const message = `Deleted ${ids.length > 1 ? 'items' : 'item'}:`;
+        success({prefix, message, suffix});
+    }
+
+    successHardDelete(ids) {
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        const message = `Permanently deleted ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
 

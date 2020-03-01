@@ -22,6 +22,7 @@ module.exports = `
           --clear            Delete all checked items
           --copy, -y         Copy item description
           --delete, -d       Delete item
+          --hardDelete, -D   Hard delete item
           --edit, -e         Edit item (@id) description
           --find, -f         Search for items
           --help, -h         Display help message
