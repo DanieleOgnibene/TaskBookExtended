@@ -6,6 +6,9 @@ module.exports = `
     
         Options
             none             Display timeline view by deadlines
+          --setLink          Set a link to the item
+          --removeLink       Remove the item's link
+          --viewLink         View the item's link
           --table            Display tasks in a grid
           --initDir          Init main directory (it is used to push data to GitHub)
           --save             Commit and push the changes in the default folder specified in taskbook.json (remember to init git)
@@ -44,6 +47,9 @@ module.exports = `
           $ tb
           $ tb --table
           $ tb --initDir path
+          $ tb --setLink @2 link
+          $ tb --removeLink 2 
+          $ tb --viewLink 2
           $ tb --save
           $ tb --boards
           $ tb --addBoard 2 @newBoard

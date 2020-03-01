@@ -12,7 +12,7 @@ const taskbookCLI = (input, flags) => {
     }
 
     if (flags.archive) {
-        return taskbook.displayArchive();
+        return taskbook.displayArchive(input);
     }
 
     if (flags.task) {
@@ -66,13 +66,11 @@ const taskbookCLI = (input, flags) => {
     }
 
     if (flags.find) {
-        taskbook.findItems(input);
-        return taskbook.displayStats();
+        return taskbook.findItems(input);
     }
 
     if (flags.list) {
-        taskbook.listByAttributes(input);
-        return taskbook.displayStats();
+        return taskbook.listByAttributes(input);
     }
 
     if (flags.edit) {
@@ -121,6 +119,18 @@ const taskbookCLI = (input, flags) => {
 
     if (flags.removeTime) {
         return taskbook.removeTime(input);
+    }
+
+    if (flags.setLink) {
+        return taskbook.setLink(input);
+    }
+
+    if (flags.removeLink) {
+        return taskbook.removeLink(input);
+    }
+
+    if (flags.viewLink) {
+        return taskbook.displayLink(input);
     }
 
     if (flags.clear) {

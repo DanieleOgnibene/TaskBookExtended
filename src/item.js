@@ -10,6 +10,7 @@ class Item {
         this.description = options.description;
         this.isStarred = options.isStarred || false;
         this.boards = options.boards || [];
+        this.link = options.link;
         this.isBug = options.isBug || false;
     }
 }

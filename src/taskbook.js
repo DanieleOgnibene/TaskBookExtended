@@ -122,6 +122,18 @@ class Taskbook {
         return dateInput ? this._convertDateStringInput(dateInput) : undefined;
     }
 
+    _getLink(desc) {
+        const linkInput = desc
+            .filter(x => this._isLinkOpt(x))
+            .map(target => target.replace('link:', ''))
+            .shift();
+        return linkInput || undefined;
+    }
+
+    _isLinkOpt(opt) {
+        return opt.includes('link:');
+    }
+
     _getOptions(input) {
         const [boards, desc] = [[], []];
         if (input.length === 0) {
@@ -132,25 +144,23 @@ class Taskbook {
         const priority = this._getPriority(input);
         const isBug = this._getIsBug(input);
         const deadline = this._getDeadline(input);
+        const link = this._getLink(input);
         input.forEach(x => {
             if (!this._isPriorityOpt(x) && !this._isBugOpt(x) && !this._isDateOpt(x)) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
             }
         });
-
         const description = desc.join(' ');
-
         if (boards.length === 0) {
             boards.push('My board');
         }
-
-        return {boards, description, id, priority, isBug, deadline};
+        boards.sort((a, b) => a.localeCompare(b));
+        return {boards, description, id, priority, isBug, deadline, link};
     }
 
     _getStats(data = this._data) {
         let [complete, inProgress, pending, notes] = [0, 0, 0, 0];
         let totalTime = 0;
-
         Object.keys(data).forEach(id => {
             const item = data[id];
             if (item._isTask) {
@@ -287,18 +297,46 @@ class Taskbook {
                     break;
             }
         });
-        const dateAttrIdentifier = 'date:';
-        const dateAttr = attr.find(att => att.startsWith(dateAttrIdentifier));
-        if (!!dateAttr) {
-            const dateInput = this._convertDateStringInput(dateAttr.replace(dateAttrIdentifier, ''));
-            data = this._filterByDate(data, dateInput);
+        const deadlineAttrIdentifier = 'deadline:';
+        const creationAttrIdentifier = 'creation:';
+        const deadlineDates = attr.find(att => att.startsWith(deadlineAttrIdentifier));
+        const creationDates = attr.find(att => att.startsWith(creationAttrIdentifier));
+        if (!!deadlineDates) {
+            const dates = deadlineDates.replace(deadlineAttrIdentifier, '');
+            const datesSplit = dates.split('-');
+            return this._getDataFilteredByDates(data, datesSplit, 'deadline');
+        }
+        if (!!creationDates) {
+            const dates = creationDates.replace(creationAttrIdentifier, '');
+            const datesSplit = dates.split('-');
+            return this._getDataFilteredByDates(data, datesSplit, '_date');
         }
         return data;
     }
 
-    _filterByDate(data, date) {
+    _getDataFilteredByDates(data, datesSplit, dataItemKey) {
+        if (datesSplit.length === 1) {
+            const dateInput = this._convertDateStringInput(datesSplit[0]);
+            return this._filterByDate(data, dateInput, dataItemKey);
+        }
+        return this._filterByPeriod(data, datesSplit, dataItemKey);
+    }
+
+    _filterByPeriod(data, dates, itemPropertyKey) {
+        const times = dates.map(date => new Date(this._convertDateStringInput(date)).getTime());
+        times.sort((a, b) => a - b);
         return Object.keys(data)
-            .filter(id => data[id].deadline === date)
+            .filter(id => {
+                const item = data[id];
+                const deadlineTime = new Date(item[itemPropertyKey]).getTime();
+                return deadlineTime >= times[0] && deadlineTime <= times[1];
+            })
+            .map(id => data[id]);
+    }
+
+    _filterByDate(data, date, itemPropertyKey) {
+        return Object.keys(data)
+            .filter(id => data[id][itemPropertyKey] === date)
             .map(id => data[id]);
     }
 
@@ -390,8 +428,8 @@ class Taskbook {
     }
 
     createNote(desc) {
-        const {id, description, boards, isBug} = this._getOptions(desc);
-        const note = new Note({id, description, boards, isBug});
+        const {id, description, boards, isBug, link} = this._getOptions(desc);
+        const note = new Note({id, description, boards, isBug, link});
         const {_data} = this;
         _data[id] = note;
         this._save(_data);
@@ -481,21 +519,25 @@ class Taskbook {
         return this._getBoards().indexOf(board) !== -1;
     }
 
-    _getGroupedByBoardAndFiltered(terms) {
+    _getGroupedByBoardAndFiltered(terms, dataToUse) {
         const boardsAndAttributes = this._getBoardsAndAttributes(terms);
         const boards = boardsAndAttributes[0];
         const attributes = boardsAndAttributes[1];
         const linkedBoards = boardsAndAttributes[2];
         const data = this._filterByAttributes(
             attributes,
-            this._getAskedDataByTerms(terms)
+            dataToUse || this._getAskedDataByTerms(terms)
         );
         const boardsToGroup = [...boards];
         boardsToGroup.push(...linkedBoards);
-        return this._groupByBoard(
-            this._filterDataByLinkedBoardsAndBoards(data, linkedBoards, boards),
-            Array.from(new Set(boardsToGroup))
-        );
+        const filteredData = this._filterDataByLinkedBoardsAndBoards(data, linkedBoards, boards);
+        return {
+            filteredData,
+            groupByBoard: this._groupByBoard(
+                filteredData,
+                Array.from(new Set(boardsToGroup))
+            )
+        };
     }
 
     _getAskedDataByTerms(terms) {
@@ -538,9 +580,8 @@ class Taskbook {
     }
 
     createTask(desc) {
-        const {boards, description, id, priority, isBug, deadline} = this._getOptions(desc);
-        const task = new Task({id, description, boards, priority, isBug, deadline});
-        task.boards.sort((a, b) => a.localeCompare(b));
+        const {boards, description, id, priority, isBug, deadline, link} = this._getOptions(desc);
+        const task = new Task({id, description, boards, priority, isBug, deadline, link});
         const {_data} = this;
         _data[id] = task;
         this._save(_data);
@@ -560,8 +601,9 @@ class Taskbook {
         render.successDelete(ids);
     }
 
-    displayArchive() {
-        render.displayByDate(this._groupByDate(this._archive, this._getCreationDates(this._archive)));
+    displayArchive(input) {
+        const {filteredData} = this._getGroupedByBoardAndFiltered(input, this._archive);
+        render.displayByDate(this._groupByDate(filteredData, this._getCreationDates(filteredData)));
         console.log('');
     }
 
@@ -612,7 +654,6 @@ class Taskbook {
     findItems(terms) {
         const result = {};
         const {_data} = this;
-
         Object.keys(_data).forEach(id => {
             if (!this._hasTerms(_data[id].description, terms)) {
                 return;
@@ -620,18 +661,20 @@ class Taskbook {
 
             result[id] = _data[id];
         });
-
         render.displayByBoard(this._groupByBoard(result));
+        this.displayStats(result);
     }
 
     listByAttributes(terms) {
-        render.displayByBoard(this._getGroupedByBoardAndFiltered(terms));
+        const {groupByBoard, filteredData} = this._getGroupedByBoardAndFiltered(terms);
+        render.displayByBoard(groupByBoard);
+        this.displayStats(filteredData);
     }
 
     displayTable(terms) {
-        const groupedByBoardAndFiltered = this._getGroupedByBoardAndFiltered(terms);
+        const {groupByBoard} = this._getGroupedByBoardAndFiltered(terms);
         const taskItemsToBeDisplayed = [];
-        Object.keys(groupedByBoardAndFiltered).forEach(board => taskItemsToBeDisplayed.push(...groupedByBoardAndFiltered[board]));
+        Object.keys(groupByBoard).forEach(board => taskItemsToBeDisplayed.push(...groupByBoard[board]));
         const uniqueTaskItemsToBeDisplayed = Array.from(new Set(taskItemsToBeDisplayed)).filter(item => item._isTask);
         const resultTableItems = uniqueTaskItemsToBeDisplayed.map(item => {
             const newTableItem = {
@@ -922,6 +965,49 @@ class Taskbook {
         });
         this._save(_data);
         render.successClearTime(ids);
+    }
+
+    setLink(input) {
+        const targets = input.filter(x => x.startsWith('@'));
+        const link = input.filter(x => !x.startsWith('@')).join();
+        const ids = this._validateIDs(targets.map(target => target.replace('@', '')));
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].link = link;
+        });
+        this._save(_data);
+        render.successSetLink(ids, link);
+    }
+
+    removeLink(input) {
+        const ids = this._validateIDs(input);
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        const {_data} = this;
+        ids.forEach(id => {
+            _data[id].link = '';
+        });
+        this._save(_data);
+        render.successRemoveLink(ids);
+    }
+
+    displayLink(input) {
+        const ids = this._validateIDs(input);
+        if (ids.length === 0) {
+            render.missingID();
+            process.exit(1);
+        }
+        console.log('\n');
+        ids.forEach(id => {
+            render.displayLink(this._data[id]);
+        });
+        console.log('\n');
     }
 
     addTime(input) {

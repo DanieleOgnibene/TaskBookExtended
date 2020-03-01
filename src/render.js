@@ -6,7 +6,7 @@ const config = require('./config');
 signale.config({displayLabel: false});
 
 const {await: wait, error, log, note, pending, success} = signale;
-const {blueBright: blue, greenBright: green, grey, magentaBright: magenta, redBright: red, underline, yellowBright: yellow} = chalk;
+const {blueBright, greenBright, cyan, grey, magentaBright, redBright, underline, yellowBright, blue} = chalk;
 
 const priorities = {2: 'yellow', 3: 'red'};
 
@@ -87,11 +87,23 @@ class Render {
     }
 
     _getStar(item) {
-        return item.isStarred ? yellow(' ★') : '';
+        return item.isStarred ? yellowBright(' ★') : '';
     }
 
     _getBug(item) {
-        return item.isBug ? red('(BUG)') : '';
+        return item.isBug ? cyan('B') : this._getVoidAttribute();
+    }
+
+    _getLink(item) {
+        return !!item.link ? magentaBright('@') : this._getVoidAttribute();
+    }
+
+    _getPriority(priority) {
+        return priority === 3 ? redBright('‼') : (priority === 2 ? yellowBright('!') : this._getVoidAttribute());
+    }
+
+    _getVoidAttribute() {
+        return blue('·');
     }
 
     _buildTitle(key, items) {
@@ -112,21 +124,16 @@ class Render {
 
     _buildMessage(item) {
         const message = [];
-
         const {isComplete, description} = item;
         const priority = parseInt(item.priority, 10);
-
+        message.unshift(this._getLink(item));
+        message.unshift(this._getBug(item));
+        message.unshift(this._getPriority(priority));
         if (!isComplete && priority > 1) {
             message.push(underline[priorities[priority]](description));
         } else {
-            message.push(isComplete ? grey(description) : description);
+            message.push(description);
         }
-
-        if (!isComplete && priority > 1) {
-            message.push(priority === 2 ? yellow('(!)') : red('(!!)'));
-        }
-
-        message.push(this._getBug(item));
         return message.join(' ');
     }
 
@@ -143,17 +150,13 @@ class Render {
         const star = this._getStar(item);
         const currentTimer = this._getCurrentActiveTimeTaken(item);
         const cumulativeTimeTaken = this._getCumulativeTimeTaken(item);
-
         const prefix = this._buildPrefix(item);
         const message = this._buildMessage(item);
         let suffix = `${age.length === 0 ? age : ''}${currentTimer}${cumulativeTimeTaken}`;
         if (suffix.length > 0) {
-            suffix = `${green(' {')}${suffix}${green(' }')}`
+            suffix = `${greenBright(' {')}${suffix}${greenBright(' }')}`
         }
         suffix = `${star}${suffix}`;
-        if (isComplete) {
-            suffix = grey(suffix);
-        }
         const msgObj = {prefix, message, suffix};
         if (_isTask) {
             return isComplete ? success(msgObj) : inProgress ? wait(msgObj) : pending(msgObj);
@@ -167,17 +170,13 @@ class Render {
         const star = this._getStar(item);
         const currentTimer = this._getCurrentActiveTimeTaken(item);
         const cumulativeTimeTaken = this._getCumulativeTimeTaken(item);
-
         const prefix = this._buildPrefix(item);
         const message = this._buildMessage(item);
         let suffix = `${currentTimer}${cumulativeTimeTaken}${this._colorBoards(boards)}`;
         if (suffix.length > 0) {
-            suffix = `${green(' {')}${suffix}${green(' }')}`
+            suffix = `${greenBright(' {')}${suffix}${greenBright(' }')}`
         }
         suffix = `${star}${suffix}`;
-        if (isComplete) {
-            suffix = grey(suffix);
-        }
         const msgObj = {prefix, message, suffix};
         if (_isTask) {
             return isComplete ? success(msgObj) : inProgress ? wait(msgObj) : pending(msgObj);
@@ -231,27 +230,27 @@ class Render {
             return;
         }
 
-        percent = percent >= 75 ? green(`${percent}%`) : percent >= 50 ? yellow(`${percent}%`) : `${percent}%`;
+        percent = percent >= 75 ? greenBright(`${percent}%`) : percent >= 50 ? yellowBright(`${percent}%`) : `${percent}%`;
 
         const status = [
-            `${magenta(pending)} ${grey('pending')}`,
-            `${blue(inProgress)} ${grey('in-progress')}`,
-            `${green(complete)} ${grey('done')}`,
-            `${blue(notes)} ${grey(notes === 1 ? 'note' : 'notes')}`
+            `${magentaBright(pending)} ${grey('pending')}`,
+            `${blueBright(inProgress)} ${grey('in-progress')}`,
+            `${greenBright(complete)} ${grey('done')}`,
+            `${blueBright(notes)} ${grey(notes === 1 ? 'note' : 'notes')}`
         ];
 
         if (complete !== 0 && inProgress === 0 && pending === 0 && notes === 0) {
-            log({prefix: '\n ', message: 'All done!', suffix: yellow('★')});
+            log({prefix: '\n ', message: 'All done!', suffix: yellowBright('★')});
         }
 
         if (pending + inProgress + complete + notes === 0) {
-            log({prefix: '\n ', message: 'Type `tb --help` to get started!', suffix: yellow('★')});
+            log({prefix: '\n ', message: 'Type `tb --help` to get started!', suffix: yellowBright('★')});
         }
 
         log({
             prefix: '\n ',
             message: `${percent} ${grey('of all tasks complete')}`,
-            suffix: `${totalTime > 0 ? `${grey('· Total time ')}${magenta(this._getDurationFormatted(totalTime))}` : ''}`
+            suffix: `${totalTime > 0 ? `${grey('· Total time ')}${magentaBright(this._getDurationFormatted(totalTime))}` : ''}`
         });
         log({prefix: ' ', message: status.join(grey(' · ')), suffix: '\n'});
     }
@@ -261,9 +260,15 @@ class Render {
         console.table(items);
     }
 
+    displayLink(item) {
+        const link = item.link;
+        const linkMessage = link ? yellowBright(link) : redBright('no data');
+        console.log(`Id: ${item._id} - Link: ${linkMessage}`);
+    }
+
     errorMessage(errorMessage) {
         const [prefix, suffix] = ['\n', '\n'];
-        const message = `Error: ${red(errorMessage)}`;
+        const message = `Error: ${redBright(errorMessage)}`;
         error({prefix, message, suffix});
     }
 
@@ -281,7 +286,7 @@ class Render {
 
     invalidCustomAppDir(path) {
         const [prefix, suffix] = ['\n', '\n'];
-        const message = `No directory found at ${red(path)}, a new one will be created when needed.`;
+        const message = `No directory found at ${redBright(path)}, a new one will be created when needed.`;
         wait({prefix, message, suffix});
     }
 
@@ -470,7 +475,7 @@ class Render {
     successPriority(ids, level) {
         const prefix = '\n';
         const message = `Updated priority of ${ids.length > 1 ? 'ids' : 'id'}: ${grey(ids.join(', '))} to`;
-        let suffix = level === '3' ? red('high') : (level === '2' ? yellow('medium') : green('normal'));
+        let suffix = level === '3' ? redBright('high') : (level === '2' ? yellowBright('medium') : greenBright('normal'));
         suffix += '\n';
         success({prefix, message, suffix});
     }
@@ -538,6 +543,18 @@ class Render {
     successClearTime(ids) {
         const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
         let message = `Cleared total time from ${ids.length > 1 ? 'items' : 'item'}:`;
+        success({prefix, message, suffix});
+    }
+
+    successSetLink(ids, link) {
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `Link ${grey(link)} set to ${ids.length > 1 ? 'items' : 'item'}:`;
+        success({prefix, message, suffix});
+    }
+
+    successRemoveLink(ids) {
+        const [prefix, suffix] = ['\n', grey(ids.join(', ')) + '\n'];
+        let message = `Link removed from ${ids.length > 1 ? 'items' : 'item'}:`;
         success({prefix, message, suffix});
     }
 
