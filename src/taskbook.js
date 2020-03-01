@@ -635,6 +635,7 @@ class Taskbook {
     displayArchive(input) {
         const {filteredData} = this._getGroupedByBoardAndFiltered(input, this._archive);
         render.displayByDate(this._groupByDate(filteredData, this._getCreationDates(filteredData)));
+        this.displayStats(filteredData);
         console.log('');
     }
 
