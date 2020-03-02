@@ -145,7 +145,11 @@ class Taskbook {
         const deadline = this._getDeadline(input);
         const link = this._getLink(input);
         input.forEach(x => {
-            if (!this._isPriorityOpt(x) && !this._isBugOpt(x) && !this._isDeadlineOpt(x)) {
+            if (!this._isPriorityOpt(x) &&
+                !this._isBugOpt(x) &&
+                !this._isDeadlineOpt(x) &&
+                !this._isLinkOpt(x)
+            ) {
                 return x.startsWith('@') && x.length > 1 ? boards.push(x) : desc.push(x);
             }
         });
