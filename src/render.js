@@ -5,9 +5,18 @@ const config = require('./config');
 const prompt = require('prompt');
 
 signale.config({displayLabel: false});
+const { log: signaleLog } = signale;
 
-const {await: wait, error, log, note, pending, success} = signale;
 const {blueBright, greenBright, cyan, grey, magentaBright, redBright, underline, yellowBright, blue} = chalk;
+
+const {wait, error, log, note, pending, success} = {
+    success: ({prefix, message, suffix}) => signaleLog({ prefix, message: greenBright('√ ') + message, suffix }),
+    pending: ({prefix, message, suffix}) => signaleLog({ prefix, message: magentaBright('· ') + message, suffix }),
+    note: ({prefix, message, suffix}) => signaleLog({ prefix, message: blueBright('σ ') + message, suffix }),
+    log: ({prefix, message, suffix}) => signaleLog({ prefix, message: ' ' + message, suffix }),
+    error: ({prefix, message, suffix}) => signaleLog({ prefix, message: redBright('ε ') + message, suffix }),
+    wait: ({prefix, message, suffix}) => signaleLog({ prefix, message: blueBright('≈ ') + message, suffix }),
+};
 
 const priorities = {2: 'yellow', 3: 'red'};
 
