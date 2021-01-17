@@ -68,7 +68,7 @@ class Taskbook {
     }
 
     _getBoards(data = {...this._data, ...this._archive}) {
-        const boards = ['My Board'];
+        const boards = ['@MyBoard'];
         Object.keys(data).forEach(id => {
             boards.push(...data[id].boards.filter(x => boards.indexOf(x) === -1));
         });
@@ -155,7 +155,7 @@ class Taskbook {
         });
         const description = desc.join(' ');
         if (boards.length === 0) {
-            boards.push('My board');
+            boards.push('@MyBoard');
         }
         boards.sort((a, b) => a.localeCompare(b));
         return {boards, description, id, priority, isBug, deadline, link};
@@ -521,7 +521,7 @@ class Taskbook {
                 return splitLinkedBoards.length > 1 ? linkedBoards.push(...splitLinkedBoards) : boards.push(x);
             }
             if (!this._isAValidBoard(`@${x}`)) {
-                return x === 'myboard' ? boards.push('My Board') : attributes.push(x);
+                return x === 'myboard' ? boards.push('@MyBoard') : attributes.push(x);
             }
 
             return boards.push(`@${x}`);
@@ -946,7 +946,7 @@ class Taskbook {
         const id = this._validateIDs(target.replace('@', ''));
 
         input.filter(x => x !== target).forEach(x => {
-            boards.push(x === 'myboard' ? 'My board' : `@${x}`);
+            boards.push(x === 'myboard' ? '@MyBoard' : `@${x}`);
         });
 
         if (boards.length === 0) {
