@@ -95,14 +95,24 @@ class Storage {
     }
 
     pushOnline() {
-        const pushCommand = `git -C ${config.get().taskbookDirectory} commit -a -m "${new Date().toLocaleString('en-GB')}" && git -C ${config.get().taskbookDirectory} push`;
+        const commitCommand = `git -C ${config.get().taskbookDirectory} commit -a -m "${new Date().toLocaleString('en-GB')}"`;
+        const pushCommand = `git -C ${config.get().taskbookDirectory} push`;
+        const errorsStack = [];
         render.savingData();
-        exec(pushCommand, (error, gitError) => {
-            if (error) {
-                render.errorMessage(gitError);
-                return;
+        exec(commitCommand, (error, gitError) => {
+            if (!!error) {
+                errorsStack.push(gitError);
             }
-            render.successSaveData();
+            exec(pushCommand, (error, gitError) => {
+                if (!!error) {
+                    errorsStack.push(gitError);
+                }
+                if (errorsStack.length > 0) {
+                    render.errorMessage(errorsStack.join('\n'));
+                } else {
+                    render.successSaveData();
+                }
+            })
         });
     }
 

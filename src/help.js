@@ -71,7 +71,7 @@ module.exports = `
           $ tb --note @coding Mergesort worse-case O(nlogn)
           $ tb --priority @3 2
           $ tb --removeBoard 3 @boardName
-          $ tb --removeDeadline 3 2
+          $ tb --removeDate 3 2
           $ tb --resetDate 3 2
           $ tb --restore 4
           $ tb --clearTimer 3 5 

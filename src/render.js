@@ -237,8 +237,17 @@ class Render {
     _getOrderedDates(dates) {
         return dates
             .sort(
-                (firstDate, secondDate) =>
-                    new Date(firstDate).getTime() - new Date(secondDate).getTime()
+                (firstDate, secondDate) => {
+                    const firstTimeStamp = +new Date(firstDate);
+                    const secondTimeStamp = +new Date(secondDate);
+                    if (Number.isNaN(firstTimeStamp)) {
+                        return -1;
+                    }
+                    if (Number.isNaN(secondTimeStamp)) {
+                        return 1;
+                    }
+                    return firstTimeStamp - secondTimeStamp;
+                }
             );
     }
 

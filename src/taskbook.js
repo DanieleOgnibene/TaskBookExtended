@@ -55,11 +55,11 @@ class Taskbook {
     }
 
     _isPriorityOpt(x) {
-        return ['p:1', 'p:2', 'p:3'].indexOf(x) > -1;
+        return ['priority:1', 'priority:2', 'priority:3'].indexOf(x) > -1;
     }
 
     _isBugOpt(x) {
-        return ['b:true', 'b:false'].indexOf(x) > -1;
+        return ['bug:true', 'bug:false'].indexOf(x) > -1;
     }
 
     _isDeadlineOpt(x) {
@@ -110,7 +110,7 @@ class Taskbook {
 
     _getIsBug(desc) {
         const opt = desc.find(x => this._isBugOpt(x));
-        return !!opt ? opt.replace('b:', '').includes('true') : false;
+        return !!opt ? opt.replace('bug:', '').includes('true') : false;
     }
 
     _getDeadline(desc) {
@@ -421,7 +421,7 @@ class Taskbook {
                     +currentId.replace(archiveIdIdentifier, '') :
                     +currentId
             );
-        const maxId = Math.max(...normalizedCurrentIds);
+        const maxId = Math.max(...normalizedCurrentIds, 1);
         const idPool = Array.from(new Array(maxId).keys()).map(key => key + 1);
         const firstFreeId = idPool.find(id => !normalizedCurrentIds.includes(id));
         return (firstFreeId || maxId + 1).toString();

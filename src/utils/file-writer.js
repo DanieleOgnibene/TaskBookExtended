@@ -5,22 +5,22 @@ const path = require('path');
 const {basename, join} = path;
 
 class FileWriter {
-    write = (dataObject, filePath, tempDirPath) => {
+    static write(dataObject, filePath, tempDirPath) {
         const data = JSON.stringify(dataObject, null, 4);
-        const tempArchiveFile = this._getTempFile(filePath, tempDirPath);
+        const tempArchiveFile = FileWriter._getTempFile(filePath, tempDirPath);
         fs.writeFileSync(tempArchiveFile, data, 'utf8');
         fs.renameSync(tempArchiveFile, filePath);
     };
 
-    _getRandomHexString(length = 8) {
+    static _getRandomHexString(length = 8) {
         return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
     }
 
-    _getTempFile(filePath, tempDirPath) {
-        const randomString = this._getRandomHexString();
+    static _getTempFile(filePath, tempDirPath) {
+        const randomString = FileWriter._getRandomHexString();
         const tempFilename = basename(filePath).split('.').join(`.TEMP-${randomString}.`);
         return join(tempDirPath, tempFilename);
     }
 }
 
-module.exports = new FileWriter();
+module.exports = FileWriter;
