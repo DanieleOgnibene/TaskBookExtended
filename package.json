@@ -47,6 +47,7 @@
   "dependencies": {
     "chalk": "^2.4.1",
     "clipboardy": "^1.2.3",
+    "jira-connector": "^3.1.0",
     "meow": "^5.0.0",
     "prompt": "^1.0.0",
     "signale": "1.4.0",

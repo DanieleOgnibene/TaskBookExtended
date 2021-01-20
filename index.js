@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 'use strict';
+
+const test = require('./src/jira');
 const taskbook = require('./src/taskbook');
 
 const taskbookCLI = (input, flags) => {
@@ -143,6 +145,10 @@ const taskbookCLI = (input, flags) => {
 
     if (flags.save) {
         return taskbook.pushOnline();
+    }
+
+    if (flags.jira) {
+        return test();
     }
 
     taskbook.displayByDeadLine();

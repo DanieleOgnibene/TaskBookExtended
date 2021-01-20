@@ -153,6 +153,9 @@ const cli = meow(help, {
         },
         save: {
             type: 'boolean'
+        },
+        jira: {
+            type: 'boolean'
         }
     }
 });
